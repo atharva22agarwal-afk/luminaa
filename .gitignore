@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables (SECURITY FIX - March 16, 2026)
+.env
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Backups and AI stuff
+.kilo/
+.qwen/
+temp_backup/
+lumina_*
+*.zip
+*.md
+!README.md
+!PRIVACY_POLICY.md
+debug.js
+get_error.js
+main.js.dead_code_archive
+test-screenshot.png
+app.html
+landing.html

@@ -1,0 +1,610 @@
+================================================================================
+                           LUMINA - PROJECT SUMMARY
+                        "Your Sacred Sanctuary"
+================================================================================
+
+Document Generated: March 20, 2026
+Version: 1.0.0
+Status: Production Ready (with recommended improvements)
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. PROJECT OVERVIEW
+2. CORE FEATURES
+3. TECHNICAL STACK
+4. FILE STRUCTURE
+5. DESIGN SYSTEM
+6. USER FLOW
+7. DATA FLOW
+8. CURRENT STATUS
+9. KNOWN ISSUES
+10. RECOMMENDATIONS
+11. GETTING STARTED
+12. FUTURE ROADMAP
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+PROJECT NAME: Lumina
+TAGLINE: Your Sacred Sanctuary
+TYPE: Web Application (Digital Wellness / Journaling / Meditation)
+MISSION: Provide a serene, private space for deep reflection, self-discovery,
+         and mental clarity through journaling, sound therapy, and AI guidance.
+
+TARGET AUDIENCE:
+- Individuals seeking mindfulness and self-reflection tools
+- People interested in meditation and binaural beats
+- Users looking for AI-guided personal growth
+- Journaling enthusiasts who want a beautiful, distraction-free interface
+
+UNIQUE VALUE PROPOSITION:
+Lumina combines three powerful modalities in one cohesive experience:
+1. Sacred Journaling with mood tracking
+2. Scientifically-tuned binaural beats for focus/meditation
+3. AI-powered oracle for gentle guidance and reflection
+
+================================================================================
+2. CORE FEATURES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 1: SANCTUARY (Dashboard)                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Daily affirmation display with streak tracking                           │
+│ - Anchored intention setting                                               │
+│ - Focus timer (Pomodoro-style: 15, 25, 45, 60 min)                         │
+│ - Quick access to all modules                                              │
+│ - Recent activity timeline                                                 │
+│ - Affirmation streak counter                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 2: SACRED RECORDS (Journaling)                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Rich text journal entries                                                │
+│ - Mood selection (happy, calm, anxious, sad, energetic, tired)            │
+│ - Calendar view for past entries                                           │
+│ - Search and filter functionality                                          │
+│ - LocalStorage persistence                                                 │
+│ - Weekly AI-generated insights                                             │
+│ - Entry deletion and editing                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 3: ORACLE (AI Guidance)                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - AI-powered reflection generator                                          │
+│ - Daily oracle card draw (12 unique cards)                                 │
+│ - Question-based guidance system                                           │
+│ - Three reflective prompts for deeper exploration                          │
+│ - Compassionate, non-judgmental responses                                  │
+│ - Powered by Groq API (fast LLM inference)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 4: DEEP STATE (Focus Timer + Audio)                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Pomodoro timer with visual breathing animation                           │
+│ - Binaural beats generator (Web Audio API)                                 │
+│ - Frequency options: 432Hz, 528Hz, 963Hz                                   │
+│ - Audio modes: Alpha, Beta, Theta waves                                    │
+│ - Play/Pause/Reset controls                                                │
+│ - Smooth audio fade in/out                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 5: QUANTUM LAB (Intention Setting)                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Primary intention anchoring                                              │
+│ - Manifestation tracking                                                   │
+│ - Vision boarding capabilities                                             │
+│ - Goal alignment exercises                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 6: VISION PORTAL                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Visual goal board creation                                               │
+│ - Image upload and organization                                            │
+│ - Manifestation visualization                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE 7: TIMELINE / HISTORY                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - Complete activity log                                                    │
+│ - Entry history with timestamps                                            │
+│ - Progress tracking over time                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+3. TECHNICAL STACK
+================================================================================
+
+FRONTEND FRAMEWORK:
+├── React 18.3.1 (UI Library)
+├── Vite 5.4.1 (Build Tool & Dev Server)
+└── React DOM 18.3.1 (Rendering)
+
+STYLING:
+├── CSS3 (Custom Stylesheets)
+├── CSS Variables (Theming System)
+├── CSS Animations & Keyframes
+└── Google Fonts (Geist, Playfair Display)
+
+ANIMATION:
+└── Framer Motion 11.5.0 (Smooth transitions, gestures)
+
+ICONS:
+└── Lucide React 0.441.0 (Consistent icon library)
+
+AUDIO:
+└── Web Audio API (Native browser audio for binaural beats)
+
+AI/ML:
+└── Groq API (Fast LLM inference for Oracle responses)
+
+DATA STORAGE:
+└── LocalStorage (Client-side persistence)
+
+LANGUAGE:
+├── JavaScript (ES6+)
+└── JSX (React's syntax extension)
+
+================================================================================
+4. FILE STRUCTURE
+================================================================================
+
+lumina/
+├── 📄 index.html              # React app entry point (Vite)
+├── 📄 landing.html            # Standalone landing page
+├── 📄 app.html                # Legacy app shell (deprecated)
+├── 📄 package.json            # Dependencies & scripts
+├── 📄 vite.config.js          # Vite configuration
+├── 📄 .gitignore              # Git ignore rules
+├── 📄 .env                    # Environment variables (API keys)
+│
+├── 📁 src/
+│   ├── 📄 main.jsx            # React entry point
+│   ├── 📄 App.jsx             # Main application component (722 lines)
+│   ├── 📄 App.css             # App-specific styles
+│   ├── 📄 index.css           # Global styles (866 lines)
+│   ├── 📄 audioEngine.js      # Audio/frequency engine
+│   ├── 📄 ErrorBoundary.jsx   # Error handling component
+│   ├── 📄 Oracle.jsx          # Oracle component
+│   │
+│   ├── 📁 components/
+│   │   ├── 📄 Affirmations.jsx
+│   │   ├── 📄 CelestialCanvas.jsx
+│   │   ├── 📄 DeepState.jsx
+│   │   ├── 📄 ManifestLab.jsx
+│   │   ├── 📄 SacredRecords.jsx
+│   │   └── 📄 VisionPortal.jsx
+│   │
+│   └── 📁 services/
+│       └── 📄 aiService.js    # AI API integration
+│
+├── 📁 dist/                   # Production build output
+│   ├── 📄 index.html
+│   └── 📁 assets/
+│       ├── 📄 index-*.css
+│       └── 📄 index-*.js
+│
+└── 📁 Documentation/
+    ├── 📄 README.md           # Project overview
+    ├── 📄 IMPLEMENTATION_GUIDE.txt  # Detailed implementation guide
+    ├── 📄 TECHNICAL_AUDIT_REPORT.md # Security & code audit
+    └── 📄 Various backup files
+
+================================================================================
+5. DESIGN SYSTEM
+================================================================================
+
+COLOR PALETTE (Light Theme):
+┌────────────────────────────────────────────────────────────┐
+│ Variable          │ Value        │ Usage                   │
+├────────────────────────────────────────────────────────────┤
+│ --offwhite        │ #FBFCFA      │ Main background         │
+│ --bg-sidebar      │ #F2F5F2      │ Sidebar background      │
+│ --bg-card         │ #FFFFFF      │ Card backgrounds        │
+│ --bg-element      │ #F8FAF8      │ UI elements             │
+│ --sage-green      │ #A8C3B0      │ Primary accent          │
+│ --sage-muted      │ rgba(...)    │ Subtle highlights       │
+│ --sage-deep       │ #7D9A86      │ Deep accent             │
+│ --text-main       │ #2C332E      │ Primary text            │
+│ --text-muted      │ rgba(...)    │ Secondary text          │
+└────────────────────────────────────────────────────────────┘
+
+COLOR PALETTE (Dark Theme):
+┌────────────────────────────────────────────────────────────┐
+│ Variable          │ Value        │ Usage                   │
+├────────────────────────────────────────────────────────────┤
+│ --offwhite        │ #080A09      │ Main background         │
+│ --bg-sidebar      │ #040504      │ Sidebar background      │
+│ --bg-card         │ #0E1210      │ Card backgrounds        │
+│ --bg-element      │ #161C18      │ UI elements             │
+│ --sage-green      │ #A8C3B0      │ Primary accent          │
+│ --text-main       │ #BDC7BE      │ Primary text            │
+│ --text-muted      │ rgba(...)    │ Secondary text          │
+└────────────────────────────────────────────────────────────┘
+
+TYPOGRAPHY:
+┌────────────────────────────────────────────────────────────┐
+│ Font              │ Weights      │ Usage                   │
+├────────────────────────────────────────────────────────────┤
+│ Geist             │ 200-800      │ UI text, body           │
+│ Playfair Display  │ 400, 700     │ Headings, quotes        │
+└────────────────────────────────────────────────────────────┘
+
+COMPONENT LIBRARY:
+- Bento Grid Cards (responsive grid layout)
+- Sidebar Navigation (collapsible)
+- Theme Toggle (Zen Lamp design)
+- Modal Dialogs
+- Toast Notifications
+- Loading Skeletons
+- Button Variants (primary, secondary, icon)
+- Input Fields (text, textarea, search)
+- Progress Indicators
+- Status Pills
+
+ANIMATIONS:
+- Fade-in / Fade-out
+- Slide transitions
+- Breathing animation (timer)
+- Pulse effects (buttons, indicators)
+- Hover lift effects
+- Shimmer (loading states)
+- Orb pulse (background)
+
+================================================================================
+6. USER FLOW
+================================================================================
+
+ENTRY POINT → LANDING PAGE (landing.html)
+    │
+    ├→ User sees minimalist design with feature cards
+    ├→ Toggle light/dark theme with Zen Lamp
+    └→ Click "Enter Sanctuary" button
+         │
+         ↓
+    MAIN APP (index.html → React App)
+         │
+         ├─→ SANCTUARY (Default View)
+         │   ├→ View daily affirmation
+         │   ├→ Set anchored intention
+         │   ├→ Start focus timer
+         │   └→ Navigate to other sections
+         │
+         ├─→ ORACLE
+         │   ├→ Draw daily oracle card
+         │   ├→ Ask questions for AI guidance
+         │   └→ Receive three reflective prompts
+         │
+         ├─→ SACRED RECORDS
+         │   ├→ Write new journal entry
+         │   ├→ Select mood
+         │   ├→ View calendar of past entries
+         │   ├→ Search/filter entries
+         │   └→ Read weekly AI insights
+         │
+         ├─→ DEEP STATE
+         │   ├→ Set timer duration
+         │   ├→ Choose frequency (432Hz, 528Hz, 963Hz)
+         │   ├→ Start binaural beats
+         │   └→ Enter focused meditation state
+         │
+         ├─→ QUANTUM LAB
+         │   ├→ Set primary intention
+         │   └→ Track manifestation progress
+         │
+         ├─→ VISION PORTAL
+         │   ├→ Upload images
+         │   └→ Create vision board
+         │
+         └─→ TIMELINE
+             └→ View complete activity history
+
+================================================================================
+7. DATA FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LOCALSTORAGE SCHEMA                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+KEY: lumina_journal_entries
+VALUE: Array of entry objects
+  [
+    {
+      "id": "uuid-string",
+      "text": "Entry content...",
+      "mood": "calm",
+      "timestamp": "2026-03-20T10:30:00.000Z"
+    }
+  ]
+
+KEY: lumina_primary_intention
+VALUE: String
+  "My intention is to cultivate peace and clarity in my daily life."
+
+KEY: lumina_affirmations
+VALUE: Array of custom affirmations
+  [
+    {
+      "id": 1234567890,
+      "text": "I am worthy of love and success.",
+      "isFavourite": true,
+      "createdAt": "2026-03-15T08:00:00.000Z"
+    }
+  ]
+
+KEY: lumina_daily_affirmation_index
+VALUE: Integer (rotating index for daily affirmation)
+
+KEY: lumina_affirmation_last_visit
+VALUE: Date string (for streak tracking)
+
+KEY: lumina_affirmation_streak
+VALUE: Integer (consecutive days)
+
+KEY: lumina_activity_log
+VALUE: Array of activity objects
+  [
+    {
+      "id": "uuid",
+      "text": "Completed 25min focus session",
+      "time": "10:30 AM"
+    }
+  ]
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ API INTEGRATION (Groq)                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ENDPOINT: https://api.groq.com/openai/v1/chat/completions
+METHOD: POST
+HEADERS:
+  - Authorization: Bearer {VITE_GROQ_KEY}
+  - Content-Type: application/json
+
+REQUEST BODY:
+{
+  "model": "llama-3.1-70b-versatile",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a compassionate, wise oracle..."
+    },
+    {
+      "role": "user",
+      "content": "{user's question}"
+    }
+  ]
+}
+
+RESPONSE:
+{
+  "choices": [
+    {
+      "message": {
+        "content": "Oracle's guidance..."
+      }
+    }
+  ]
+}
+
+================================================================================
+8. CURRENT STATUS
+================================================================================
+
+DEVELOPMENT STAGE: Production Ready
+VERSION: 1.0.0
+LAST UPDATED: March 20, 2026
+
+COMPLETED FEATURES:
+✅ Landing page with theme toggle
+✅ Sanctuary dashboard with bento grid
+✅ Sacred Records journaling with mood tracking
+✅ Oracle AI guidance system
+✅ Deep State focus timer with binaural beats
+✅ Quantum Lab intention setting
+✅ Vision Portal (basic)
+✅ Timeline/History view
+✅ Light/Dark theme system
+✅ LocalStorage persistence
+✅ Affirmation system with streaks
+✅ Activity logging
+✅ Responsive design (desktop optimized)
+
+PARTIALLY COMPLETED:
+⚠️  Vision Portal (needs image upload implementation)
+⚠️  Mobile navigation (bottom nav not fully implemented)
+⚠️  PDF export for journal entries
+⚠️  Statistics dashboard
+
+NOT STARTED:
+❌  Cloud sync/backup
+❌  PWA/offline support
+❌  Keyboard shortcuts
+❌  TypeScript migration
+❌  Unit tests
+❌  Additional soundscapes (nature sounds)
+
+================================================================================
+9. KNOWN ISSUES
+================================================================================
+
+SECURITY (CRITICAL):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Issue: .env file not in .gitignore                                         │
+│ Risk: API key exposure if committed to git                                 │
+│ Status: CONFIRMED - Requires immediate attention                           │
+│ Fix: Add .env to .gitignore, rotate API key                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Issue: No encryption on localStorage                                       │
+│ Risk: Journal entries stored in plain text                                 │
+│ Status: CONFIRMED - Medium priority                                        │
+│ Fix: Implement client-side encryption (e.g., CryptoJS)                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PERFORMANCE:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Issue: Bundle size is 360KB (uncompressed)                                 │
+│ Impact: Slow initial load on slow connections                              │
+│ Status: Known - Optimization recommended                                   │
+│ Fix: Code splitting, lazy loading, tree shaking                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ACCESSIBILITY:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Issue: Missing ARIA labels on interactive elements                         │
+│ Impact: Screen reader compatibility issues                                 │
+│ Status: Known - Medium priority                                            │
+│ Fix: Add aria-label, role attributes                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TESTING:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Issue: No unit or integration tests                                        │
+│ Impact: Regression risk during updates                                     │
+│ Status: Known - Recommended                                                │
+│ Fix: Set up Vitest + React Testing Library                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+10. RECOMMENDATIONS
+================================================================================
+
+IMMEDIATE (This Week):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. Add .env to .gitignore                                                  │
+│ 2. Rotate Groq API key                                                     │
+│ 3. Add loading states for AI responses                                     │
+│ 4. Implement PDF export for journal entries                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SHORT-TERM (This Month):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. Code splitting for heavy components                                     │
+│ 2. Mobile bottom navigation                                                │
+│ 3. Statistics dashboard                                                    │
+│ 4. Keyboard shortcuts                                                      │
+│ 5. Enhanced error handling                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+MEDIUM-TERM (Next Quarter):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. TypeScript migration                                                    │
+│ 2. Client-side encryption for localStorage                                 │
+│ 3. Cloud sync option (Firebase/Supabase)                                   │
+│ 4. Additional soundscapes (rain, ocean, forest)                            │
+│ 5. Unit test coverage (80%+)                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+LONG-TERM (6 Months):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. PWA support (offline mode, install prompt)                              │
+│ 2. User accounts & authentication                                          │
+│ 3. Cross-device sync                                                       │
+│ 4. Export to multiple formats (PDF, Markdown, JSON)                        │
+│ 5. Advanced analytics & insights                                           │
+│ 6. Community features (optional sharing)                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+11. GETTING STARTED
+================================================================================
+
+PREREQUISITES:
+- Node.js 18+ installed
+- npm or yarn package manager
+- Modern web browser (Chrome, Firefox, Edge, Safari)
+
+INSTALLATION:
+
+1. Clone or navigate to project directory:
+   cd c:\Users\athar\OneDrive\Desktop\lumina
+
+2. Install dependencies:
+   npm install
+
+3. Set up environment variables:
+   - Copy .env.example to .env
+   - Add your Groq API key:
+     VITE_GROQ_KEY=your_api_key_here
+
+4. Start development server:
+   npm run dev
+
+5. Open browser:
+   - Landing page: file:///c:/Users/athar/OneDrive/Desktop/lumina/landing.html
+   - Main app: http://localhost:5173
+
+BUILD FOR PRODUCTION:
+
+1. Create production build:
+   npm run build
+
+2. Preview production build:
+   npm run preview
+
+3. Deploy dist/ folder to hosting service
+
+AVAILABLE SCRIPTS:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Command              │ Description                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ npm run dev          │ Start Vite dev server (localhost:5173)              │
+│ npm run build        │ Build for production                                 │
+│ npm run preview      │ Preview production build locally                     │
+│ npm run test         │ Run tests (when implemented)                         │
+│ npm run lint         │ Run ESLint (when configured)                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+12. FUTURE ROADMAP
+================================================================================
+
+Q2 2026 (April - June):
+├── Mobile app (React Native)
+├── Cloud sync with end-to-end encryption
+├── Advanced mood analytics
+├── Guided meditation library
+└── Integration with wearables (Apple Watch, Fitbit)
+
+Q3 2026 (July - September):
+├── Multi-language support
+├── Custom themes & color schemes
+├── Voice-to-text journaling
+├── AI-powered mood detection from text
+└── Collaboration features (shared journals)
+
+Q4 2026 (October - December):
+├── Desktop app (Electron)
+├── Browser extension (quick capture)
+├── API for third-party integrations
+├── Premium tier (advanced features)
+└── Community marketplace (templates, themes)
+
+================================================================================
+                              END OF SUMMARY
+================================================================================
+
+For detailed implementation guides, see:
+- IMPLEMENTATION_GUIDE.txt (Step-by-step improvements)
+- TECHNICAL_AUDIT_REPORT.md (Security & code analysis)
+- README.md (Quick start guide)
+
+For questions or support, refer to the project documentation or
+reach out to the development team.
+
+================================================================================
+                    "A sacred space for your inner journey"
+================================================================================

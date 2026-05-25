@@ -1,0 +1,1244 @@
+================================================================================
+                        LUMINA - IMPLEMENTATION GUIDE
+                    Recommended Changes & Improvements
+================================================================================
+
+This document contains all recommended changes for the Lumina application,
+organized by priority and category. Each section includes code examples.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. DESIGN POLISH
+   1.1 Page Transitions
+   1.2 Loading States
+   1.3 Micro-interactions
+   1.4 Mobile Responsiveness
+   1.5 Consistent Icons
+
+2. PERFORMANCE
+   2.1 Code Splitting / Lazy Loading
+   2.2 Memoization
+   2.3 Debounce Inputs
+   2.4 Bundle Size Optimization
+
+3. FEATURES
+   3.1 PDF Export for Journal Entries
+   3.2 Statistics Dashboard
+   3.3 Custom Affirmations
+   3.4 Keyboard Shortcuts
+   3.5 More Soundscapes
+
+4. CODE QUALITY
+   4.1 TypeScript Migration Guide
+   4.2 Environment Variables
+   4.3 Error Handling Improvements
+   4.4 Testing Setup
+
+================================================================================
+1. DESIGN POLISH
+================================================================================
+
+------------------------------------------------------------------------------
+1.1 PAGE TRANSITIONS
+------------------------------------------------------------------------------
+
+FILE: src/App.jsx
+CHANGE: Add smooth fade/slide animations between tab changes
+
+CURRENT CODE (around line 280):
+```jsx
+<AnimatePresence mode="wait">
+  {activeTab === 'Sanctuary' ? (
+    <motion.main
+      key="sanctuary"
+      initial={{ opacity: 0, x: 20 }} 
+      animate={{ opacity: 1, x: 0 }} 
+      exit={{ opacity: 0, x: -20 }}
+      className="main-stage"
+    >
+```
+
+REPLACEMENT: Enhanced transitions for all tabs
+```jsx
+<AnimatePresence mode="wait">
+  {activeTab === 'Sanctuary' && (
+    <motion.main
+      key="sanctuary"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="main-stage"
+    >
+      {/* Sanctuary content */}
+    </motion.main>
+  )}
+  
+  {activeTab === 'Oracle' && (
+    <motion.main
+      key="oracle"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="main-stage"
+    >
+      <Oracle />
+    </motion.main>
+  )}
+  
+  {/* Repeat for other tabs: Quantum Lab, Deep State, Sacred Records, Vision Portal */}
+</AnimatePresence>
+```
+
+------------------------------------------------------------------------------
+1.2 LOADING STATES
+------------------------------------------------------------------------------
+
+FILE: src/Oracle.jsx
+CHANGE: Add skeleton loader for AI responses
+
+ADD THIS COMPONENT at top of file:
+```jsx
+const SkeletonLoader = () => (
+  <div className="oracle-response" style={{ 
+    background: 'var(--bg-element)', 
+    borderLeft: '4px solid var(--sage-green)',
+    padding: '25px',
+    borderRadius: '20px'
+  }}>
+    <div style={{ 
+      height: '20px', 
+      background: 'linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%)',
+      backgroundSize: '200% 100%',
+      borderRadius: '4px',
+      marginBottom: '12px',
+      animation: 'shimmer 1.5s infinite'
+    }} />
+    <div style={{ 
+      height: '20px', 
+      width: '80%',
+      background: 'linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%)',
+      backgroundSize: '200% 100%',
+      borderRadius: '4px',
+      animation: 'shimmer 1.5s infinite'
+    }} />
+  </div>
+);
+```
+
+ADD CSS to src/index.css:
+```css
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+```
+
+IN ORACLE COMPONENT, add loading state:
+```jsx
+const [isLoading, setIsLoading] = useState(false);
+
+const handleOracleSubmit = async () => {
+  setIsLoading(true);
+  try {
+    const response = await getOracleResponse(question);
+    setReflection(response);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// In render:
+{isLoading ? (
+  <SkeletonLoader />
+) : (
+  reflection && <div className="oracle-response">{reflection}</div>
+)}
+```
+
+------------------------------------------------------------------------------
+1.3 MICRO-INTERACTIONS
+------------------------------------------------------------------------------
+
+FILE: src/index.css
+ADD: Enhanced button and input interactions
+
+```css
+/* Enhanced Button Hover Effect */
+.btn-primary, .enter-button, button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after, .enter-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::after, .enter-button:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Input Focus Glow */
+input:focus, textarea:focus, .oracle-textarea:focus {
+  outline: none;
+  border-color: var(--sage-green);
+  box-shadow: 0 0 0 3px var(--sage-muted);
+  transition: all 0.3s ease;
+}
+
+/* Success Animation */
+@keyframes success-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.success-animation {
+  animation: success-pop 0.4s ease-out;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  right: 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--sage-green);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow-lg);
+  animation: slide-in-right 0.4s ease-out;
+  z-index: 10000;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+```
+
+------------------------------------------------------------------------------
+1.4 MOBILE RESPONSIVENESS
+------------------------------------------------------------------------------
+
+FILE: src/index.css
+CHANGE: Add mobile bottom navigation
+
+ADD:
+```css
+/* Mobile Bottom Navigation */
+@media (max-width: 768px) {
+  .resilient-layout {
+    grid-template-columns: 1fr;
+    padding-bottom: 70px; /* Space for bottom nav */
+  }
+
+  .sidebar {
+    display: none; /* Hide sidebar on mobile */
+  }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-sidebar);
+    border-top: 1px solid var(--border-light);
+    padding: 8px 0;
+    z-index: 1000;
+    justify-content: space-around;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--sage-green);
+  }
+
+  .mobile-nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .main-stage {
+    padding: 30px 20px;
+  }
+
+  .logo-text {
+    font-size: 2.5rem;
+    letter-spacing: 6px;
+  }
+
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-hero, .bento-full {
+    grid-column: span 1;
+  }
+}
+```
+
+FILE: src/App.jsx
+ADD: Mobile navigation component
+
+```jsx
+const MobileNav = ({ activeTab, setActiveTab }) => (
+  <nav className="mobile-nav">
+    <div className={`mobile-nav-item ${activeTab === 'Sanctuary' ? 'active' : ''}`} onClick={() => setActiveTab('Sanctuary')}>
+      <LayoutGrid size={20} />
+      <span>Home</span>
+    </div>
+    <div className={`mobile-nav-item ${activeTab === 'Oracle' ? 'active' : ''}`} onClick={() => setActiveTab('Oracle')}>
+      <Eye size={20} />
+      <span>Oracle</span>
+    </div>
+    <div className={`mobile-nav-item ${activeTab === 'Quantum Lab' ? 'active' : ''}`} onClick={() => setActiveTab('Quantum Lab')}>
+      <Zap size={20} />
+      <span>Lab</span>
+    </div>
+    <div className={`mobile-nav-item ${activeTab === 'Sacred Records' ? 'active' : ''}`} onClick={() => setActiveTab('Sacred Records')}>
+      <Book size={20} />
+      <span>Journal</span>
+    </div>
+  </nav>
+);
+
+// Add to render (at bottom of App component):
+<MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
+```
+
+------------------------------------------------------------------------------
+1.5 CONSISTENT ICONS
+------------------------------------------------------------------------------
+
+FILE: landing.html
+CHANGE: Replace emoji with Lucide icons
+
+In the feature cards, replace:
+```html
+<!-- BEFORE -->
+<div class="feature-icon">📝</div>
+<div class="feature-icon">🎵</div>
+<div class="feature-icon">✨</div>
+
+<!-- AFTER -->
+<div class="feature-icon">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+    <path d="M2 2l7.586 7.586"/>
+    <circle cx="11" cy="11" r="2"/>
+  </svg>
+</div>
+<div class="feature-icon">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/>
+  </svg>
+</div>
+<div class="feature-icon">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+</div>
+```
+
+================================================================================
+2. PERFORMANCE
+================================================================================
+
+------------------------------------------------------------------------------
+2.1 CODE SPLITTING / LAZY LOADING
+------------------------------------------------------------------------------
+
+FILE: src/App.jsx
+CHANGE: Lazy load heavy components
+
+IMPORTS (replace current imports):
+```jsx
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+
+// Lazy load heavy components
+const Oracle = lazy(() => import('./Oracle'));
+const SacredRecords = lazy(() => import('./components/SacredRecords'));
+const VisionPortal = lazy(() => import('./components/VisionPortal'));
+const ManifestLab = lazy(() => import('./components/ManifestLab'));
+const DeepState = lazy(() => import('./components/DeepState'));
+const CelestialCanvas = lazy(() => import('./components/CelestialCanvas'));
+```
+
+WRAP LAZY COMPONENTS WITH SUSPENSE:
+```jsx
+{activeTab === 'Oracle' ? (
+  <Suspense fallback={<LoadingSpinner />}>
+    <Oracle />
+  </Suspense>
+) : activeTab === 'Sacred Records' ? (
+  <Suspense fallback={<LoadingSpinner />}>
+    <SacredRecords />
+  </Suspense>
+) : // ... repeat for other lazy-loaded components
+```
+
+ADD LoadingSpinner component:
+```jsx
+const LoadingSpinner = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    height: '400px' 
+  }}>
+    <div className="loader" style={{
+      width: '40px',
+      height: '40px',
+      border: '3px solid var(--bg-tertiary)',
+      borderTop: '3px solid var(--sage-green)',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    }} />
+  </div>
+);
+```
+
+------------------------------------------------------------------------------
+2.2 MEMOIZATION
+------------------------------------------------------------------------------
+
+FILE: src/App.jsx
+CHANGE: Memoize expensive calculations
+
+```jsx
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+
+// Memoize filtered activity log
+const recentActivities = useMemo(() => {
+  return activityLog.slice(0, 5);
+}, [activityLog]);
+
+// Memoize timer formatting
+const formattedTime = useMemo(() => {
+  return formatTimer(timeRemaining);
+}, [timeRemaining]);
+
+// Callback for theme toggle
+const toggleTheme = useCallback(() => {
+  setTheme(prev => prev === 'light' ? 'dark' : 'light');
+}, []);
+
+// Memoize sidebar items to prevent re-renders
+const sidebarItems = useMemo(() => [
+  { icon: LayoutGrid, label: 'Sanctuary', id: 'Sanctuary' },
+  { icon: Eye, label: 'Oracle', id: 'Oracle' },
+  { icon: Zap, label: 'Quantum Lab', id: 'Quantum Lab' },
+  { icon: Coffee, label: 'Deep State', id: 'Deep State' },
+  { icon: Book, label: 'Sacred Records', id: 'Sacred Records' },
+  { icon: ImageIcon, label: 'Vision Portal', id: 'Vision Portal' },
+  { icon: History, label: 'Timeline', id: 'History' }
+], []);
+```
+
+------------------------------------------------------------------------------
+2.3 DEBOUNCE INPUTS
+------------------------------------------------------------------------------
+
+FILE: src/components/SacredRecords.jsx
+CHANGE: Add debounce to search input
+
+CREATE custom hook (src/hooks/useDebounce.js):
+```jsx
+import { useState, useEffect } from 'react';
+
+export function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+USAGE IN COMPONENT:
+```jsx
+import { useDebounce } from '../hooks/useDebounce';
+
+const [searchTerm, setSearchTerm] = useState('');
+const debouncedSearch = useDebounce(searchTerm, 300);
+
+// Use debouncedSearch for filtering instead of searchTerm
+const filteredEntries = entries.filter(entry =>
+  entry.text.toLowerCase().includes(debouncedSearch.toLowerCase())
+);
+```
+
+------------------------------------------------------------------------------
+2.4 BUNDLE SIZE OPTIMIZATION
+------------------------------------------------------------------------------
+
+FILE: vite.config.js
+ADD: Build optimizations
+
+```jsx
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'framer-motion': ['framer-motion'],
+          'lucide-icons': ['lucide-react'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
+});
+```
+
+================================================================================
+3. FEATURES
+================================================================================
+
+------------------------------------------------------------------------------
+3.1 PDF EXPORT FOR JOURNAL ENTRIES
+------------------------------------------------------------------------------
+
+INSTALL: 
+```bash
+npm install jspdf
+```
+
+FILE: src/components/SacredRecords.jsx
+ADD: Export functionality
+
+```jsx
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
+const exportToPDF = (entries) => {
+  const doc = new jsPDF();
+  
+  // Title
+  doc.setFontSize(20);
+  doc.text('Lumina - Sacred Records', 20, 20);
+  
+  // Date
+  doc.setFontSize(10);
+  doc.text(`Exported on: ${new Date().toLocaleDateString()}`, 20, 30);
+  
+  // Entries table
+  const tableData = entries.map(entry => [
+    new Date(entry.timestamp).toLocaleDateString(),
+    entry.mood || 'N/A',
+    entry.text.substring(0, 100) + '...'
+  ]);
+  
+  doc.autoTable({
+    startY: 40,
+    head: [['Date', 'Mood', 'Entry']],
+    body: tableData,
+    theme: 'striped',
+    headStyles: { fillColor: [168, 195, 176] },
+  });
+  
+  doc.save('lumina-sacred-records.pdf');
+};
+
+// Add export button in UI
+<button 
+  onClick={() => exportToPDF(entries)}
+  className="btn-primary"
+  style={{ marginTop: '20px' }}
+>
+  Export to PDF
+</button>
+```
+
+------------------------------------------------------------------------------
+3.2 STATISTICS DASHBOARD
+------------------------------------------------------------------------------
+
+CREATE NEW FILE: src/components/Statistics.jsx
+```jsx
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { Activity, TrendingUp, Calendar, Clock } from 'lucide-react';
+
+const Statistics = ({ entries }) => {
+  const stats = useMemo(() => {
+    const totalEntries = entries.length;
+    const totalWords = entries.reduce((acc, entry) => 
+      acc + (entry.text?.split(' ').length || 0), 0);
+    
+    // Mood distribution
+    const moodCounts = entries.reduce((acc, entry) => {
+      if (entry.mood) {
+        acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    
+    // Weekly activity
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weeklyEntries = entries.filter(e => 
+      new Date(e.timestamp) > weekAgo
+    ).length;
+    
+    return { totalEntries, totalWords, moodCounts, weeklyEntries };
+  }, [entries]);
+  
+  return (
+    <div className="statistics-container" style={{ padding: '40px' }}>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", marginBottom: '30px' }}>
+        Your Journey
+      </h2>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+        <StatCard 
+          icon={<Activity size={24} />}
+          label="Total Entries"
+          value={stats.totalEntries}
+        />
+        <StatCard 
+          icon={<Calendar size={24} />}
+          label="This Week"
+          value={stats.weeklyEntries}
+        />
+        <StatCard 
+          icon={<TrendingUp size={24} />}
+          label="Total Words"
+          value={stats.totalWords}
+        />
+        <StatCard 
+          icon={<Clock size={24} />}
+          label="Avg Words/Entry"
+          value={Math.round(stats.totalWords / stats.totalEntries) || 0}
+        />
+      </div>
+      
+      {/* Mood Distribution */}
+      <div style={{ marginTop: '40px' }}>
+        <h3 style={{ marginBottom: '20px' }}>Mood Distribution</h3>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {Object.entries(stats.moodCounts).map(([mood, count]) => (
+            <div 
+              key={mood}
+              style={{
+                padding: '12px 20px',
+                background: 'var(--bg-element)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>{getMoodEmoji(mood)}</span>
+              <span>{mood}</span>
+              <span style={{ opacity: 0.6 }}>({count})</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const StatCard = ({ icon, label, value }) => (
+  <div style={{
+    padding: '24px',
+    background: 'var(--bg-card)',
+    borderRadius: '16px',
+    border: '1px solid var(--border-light)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px'
+  }}>
+    <div style={{ 
+      width: '48px', 
+      height: '48px', 
+      background: 'var(--bg-element)',
+      borderRadius: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'var(--sage-green)'
+    }}>
+      {icon}
+    </div>
+    <div>
+      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{value}</div>
+    </div>
+  </div>
+);
+
+const getMoodEmoji = (mood) => {
+  const moods = {
+    'happy': '😊',
+    'calm': '😌',
+    'anxious': '😰',
+    'sad': '😢',
+    'energetic': '⚡',
+    'tired': '😴'
+  };
+  return moods[mood?.toLowerCase()] || '📝';
+};
+
+export default Statistics;
+```
+
+------------------------------------------------------------------------------
+3.3 CUSTOM AFFIRMATIONS
+------------------------------------------------------------------------------
+
+FILE: src/App.jsx
+CHANGE: Add custom affirmations feature
+
+ADD state:
+```jsx
+const [customAffirmations, setCustomAffirmations] = useState(() => {
+  const saved = localStorage.getItem('lumina_custom_affirmations');
+  return saved ? JSON.parse(saved) : [];
+});
+```
+
+ADD save effect:
+```jsx
+useEffect(() => {
+  localStorage.setItem('lumina_custom_affirmations', JSON.stringify(customAffirmations));
+}, [customAffirmations]);
+```
+
+ADD functions:
+```jsx
+const addCustomAffirmation = (text) => {
+  const newAffirmation = {
+    id: Date.now(),
+    text,
+    createdAt: new Date().toISOString()
+  };
+  setCustomAffirmations(prev => [...prev, newAffirmation]);
+  logActivity(`Added custom affirmation`);
+};
+
+const removeCustomAffirmation = (id) => {
+  setCustomAffirmations(prev => prev.filter(a => a.id !== id));
+};
+
+const getAllAffirmations = () => {
+  return [...affirmations, ...customAffirmations.map(a => a.text)];
+};
+```
+
+ADD UI component for adding custom affirmations:
+```jsx
+const AddAffirmationForm = () => {
+  const [text, setText] = useState('');
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (text.trim()) {
+      addCustomAffirmation(text.trim());
+      setText('');
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Write your own affirmation..."
+          style={{
+            flex: 1,
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid var(--border-light)',
+            background: 'var(--bg-element)',
+            color: 'var(--text-primary)'
+          }}
+        />
+        <button type="submit" className="btn-primary">
+          <Plus size={20} />
+        </button>
+      </div>
+    </form>
+  );
+};
+```
+
+------------------------------------------------------------------------------
+3.4 KEYBOARD SHORTCUTS
+------------------------------------------------------------------------------
+
+FILE: src/App.jsx
+ADD: Keyboard shortcuts hook
+
+CREATE: src/hooks/useKeyboardShortcuts.js
+```jsx
+import { useEffect } from 'react';
+
+export function useKeyboardShortcuts(shortcuts) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check for modifier key (Ctrl/Cmd)
+      const isModifierPressed = e.ctrlKey || e.metaKey;
+      
+      if (isModifierPressed) {
+        const shortcut = shortcuts[e.key.toLowerCase()];
+        if (shortcut) {
+          e.preventDefault();
+          shortcut();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [shortcuts]);
+}
+```
+
+USAGE IN APP:
+```jsx
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+
+// In App component:
+useKeyboardShortcuts({
+  'k': () => setActiveTab('Sanctuary'),  // Cmd+K - Go to Sanctuary
+  'j': () => setActiveTab('Sacred Records'),  // Cmd+J - Go to Journal
+  'o': () => setActiveTab('Oracle'),  // Cmd+O - Open Oracle
+  'Enter': () => {
+    // Cmd+Enter - Save current entry (if in journal)
+    if (activeTab === 'Sacred Records') {
+      // Trigger save
+    }
+  }
+});
+```
+
+ADD shortcuts reference modal:
+```jsx
+const ShortcutsModal = ({ isOpen, onClose }) => (
+  <div className={`modal ${isOpen ? 'open' : ''}`} onClick={onClose}>
+    <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <h2>Keyboard Shortcuts</h2>
+      <div style={{ display: 'grid', gap: '12px' }}>
+        <ShortcutRow keys={['⌘', 'K']} description="Go to Sanctuary" />
+        <ShortcutRow keys={['⌘', 'J']} description="Open Journal" />
+        <ShortcutRow keys={['⌘', 'O']} description="Open Oracle" />
+        <ShortcutRow keys={['⌘', 'Enter']} description="Save Entry" />
+        <ShortcutRow keys={['⌘', ',']} description="Settings" />
+      </div>
+    </div>
+  </div>
+);
+```
+
+------------------------------------------------------------------------------
+3.5 MORE SOUNDSCAPES
+------------------------------------------------------------------------------
+
+FILE: src/audioEngine.js
+ADD: Additional soundscapes
+
+```jsx
+// Add to audioModes
+export const audioModes = {
+  Alpha: { freq: 432, label: 'Alpha Waves', desc: 'Relaxed focus' },
+  Beta: { freq: 528, label: 'Beta Waves', desc: 'Active thinking' },
+  Theta: { freq: 963, label: 'Theta Waves', desc: 'Deep meditation' },
+  Gamma: { freq: 40, label: 'Gamma Waves', desc: 'Peak awareness' },
+  Delta: { freq: 2, label: 'Delta Waves', desc: 'Deep sleep' },
+};
+
+// Add nature sounds
+export const natureSounds = {
+  Rain: 'path/to/rain.mp3',
+  Ocean: 'path/to/ocean.mp3',
+  Forest: 'path/to/forest.mp3',
+  WhiteNoise: 'path/to/white-noise.mp3',
+};
+
+// Enhanced play function
+export const audioEngine = {
+  play: (mode, volume = 0.1) => {
+    // Existing oscillator code...
+  },
+  
+  playNatureSound: (sound, volume = 0.5) => {
+    const audio = new Audio(natureSounds[sound]);
+    audio.loop = true;
+    audio.volume = volume;
+    audio.play();
+    return audio;
+  },
+  
+  stop: () => {
+    // Existing stop code...
+  }
+};
+```
+
+ADD UI for soundscape selection in DeepState component:
+```jsx
+const [soundType, setSoundType] = useState('binaural'); // 'binaural' or 'nature'
+
+<div className="sound-selector">
+  <button 
+    className={soundType === 'binaural' ? 'active' : ''}
+    onClick={() => setSoundType('binaural')}
+  >
+    Binaural Beats
+  </button>
+  <button 
+    className={soundType === 'nature' ? 'active' : ''}
+    onClick={() => setSoundType('nature')}
+  >
+    Nature Sounds
+  </button>
+</div>
+
+{soundType === 'nature' && (
+  <div className="nature-sounds-grid">
+    {Object.keys(natureSounds).map(sound => (
+      <button 
+        key={sound}
+        onClick={() => audioEngine.playNatureSound(sound)}
+        className="sound-btn"
+      >
+        {sound}
+      </button>
+    ))}
+  </div>
+)}
+```
+
+================================================================================
+4. CODE QUALITY
+================================================================================
+
+------------------------------------------------------------------------------
+4.1 TYPESCRIPT MIGRATION GUIDE
+------------------------------------------------------------------------------
+
+STEP 1: Install TypeScript
+```bash
+npm install -D typescript @types/react @types/react-dom
+```
+
+STEP 2: Create tsconfig.json
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+STEP 3: Create tsconfig.node.json
+```json
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.js"]
+}
+```
+
+STEP 4: Rename files progressively
+- Start with utility files: audioEngine.js → audioEngine.ts
+- Then components: App.jsx → App.tsx
+- Update imports as you go
+
+STEP 5: Add types
+```typescript
+// src/types/index.ts
+export interface JournalEntry {
+  id: string;
+  text: string;
+  mood?: string;
+  timestamp: string;
+}
+
+export interface Affirmation {
+  id: number;
+  text: string;
+  createdAt: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  text: string;
+  time: string;
+}
+
+export type Theme = 'light' | 'dark';
+
+export type TabType = 
+  | 'Sanctuary' 
+  | 'Oracle' 
+  | 'Quantum Lab' 
+  | 'Deep State' 
+  | 'Sacred Records' 
+  | 'Vision Portal' 
+  | 'History';
+```
+
+------------------------------------------------------------------------------
+4.2 ENVIRONMENT VARIABLES
+------------------------------------------------------------------------------
+
+CREATE: .env
+```
+VITE_API_URL=https://api.lumina.app
+VITE_AI_ENDPOINT=/v1/oracle
+```
+
+CREATE: .env.example
+```
+VITE_API_URL=your_api_url
+VITE_AI_ENDPOINT=your_ai_endpoint
+```
+
+UPDATE: src/services/aiService.js
+```jsx
+const API_URL = import.meta.env.VITE_API_URL;
+const AI_ENDPOINT = import.meta.env.VITE_AI_ENDPOINT;
+
+export const getOracleResponse = async (question) => {
+  try {
+    const response = await fetch(`${API_URL}${AI_ENDPOINT}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+    // ... rest of code
+  }
+};
+```
+
+ADD to .gitignore:
+```
+.env
+.env.local
+.env.*.local
+```
+
+------------------------------------------------------------------------------
+4.3 ERROR HANDLING IMPROVEMENTS
+------------------------------------------------------------------------------
+
+CREATE: src/utils/errorHandler.js
+```jsx
+export class LuminaError extends Error {
+  constructor(message, code, originalError) {
+    super(message);
+    this.name = 'LuminaError';
+    this.code = code;
+    this.originalError = originalError;
+  }
+}
+
+export const handleError = (error, context) => {
+  console.error(`[Lumina Error] ${context}:`, error);
+  
+  // Log to error tracking service (e.g., Sentry)
+  // Sentry.captureException(error);
+  
+  // Show user-friendly message
+  const errorMessages = {
+    'NETWORK_ERROR': 'Unable to connect. Please check your internet connection.',
+    'AI_SERVICE_ERROR': 'The oracle is temporarily unavailable. Please try again.',
+    'STORAGE_ERROR': 'Unable to save your entry. Please try again.',
+    'AUDIO_ERROR': 'Unable to play audio. Please check your browser settings.'
+  };
+  
+  return errorMessages[error.code] || 'Something went wrong. Please try again.';
+};
+```
+
+USAGE IN COMPONENTS:
+```jsx
+try {
+  const response = await getOracleResponse(question);
+  setReflection(response);
+} catch (error) {
+  const userMessage = handleError(error, 'Oracle');
+  setError(userMessage);
+  setTimeout(() => setError(null), 5000);
+}
+```
+
+------------------------------------------------------------------------------
+4.4 TESTING SETUP
+------------------------------------------------------------------------------
+
+INSTALL:
+```bash
+npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+
+CREATE: vitest.config.js
+```jsx
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+  },
+});
+```
+
+CREATE: src/test/setup.js
+```jsx
+import '@testing-library/jest-dom';
+```
+
+CREATE: src/App.test.jsx
+```jsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import App from './App';
+
+describe('App', () => {
+  it('renders Sanctuary tab by default', () => {
+    render(<App />);
+    expect(screen.getByText(/Divine State/i)).toBeInTheDocument();
+  });
+
+  it('switches to Oracle tab when clicked', () => {
+    render(<App />);
+    const oracleNav = screen.getByText(/Oracle/i);
+    fireEvent.click(oracleNav);
+    expect(screen.getByText(/Ask the Oracle/i)).toBeInTheDocument();
+  });
+
+  it('toggles theme when lamp is clicked', () => {
+    render(<App />);
+    const lamp = document.querySelector('.zen-lamp-container');
+    fireEvent.click(lamp);
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+});
+```
+
+ADD to package.json:
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  }
+}
+```
+
+================================================================================
+IMPLEMENTATION ORDER (RECOMMENDED)
+================================================================================
+
+PHASE 1 - Quick Wins (1-2 days):
+1. Loading States (1.2)
+2. Micro-interactions (1.3)
+3. Consistent Icons (1.5)
+
+PHASE 2 - Performance (2-3 days):
+1. Code Splitting (2.1)
+2. Memoization (2.2)
+3. Debounce Inputs (2.3)
+
+PHASE 3 - Features (3-4 days):
+1. PDF Export (3.1)
+2. Statistics Dashboard (3.2)
+3. Keyboard Shortcuts (3.4)
+
+PHASE 4 - Code Quality (4-5 days):
+1. Environment Variables (4.2)
+2. Error Handling (4.3)
+3. Testing Setup (4.4)
+4. TypeScript Migration (4.1) - Ongoing
+
+================================================================================
+END OF IMPLEMENTATION GUIDE
+================================================================================
