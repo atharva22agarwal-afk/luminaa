@@ -15,13 +15,18 @@ const MOODS = [
   { emoji: '✨', label: 'Thriving', value: 'thriving' },
 ];
 
-// Get today's date formatted
-const getTodayFormatted = () => {
-  const today = new Date();
+const getDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDateInfo = (date) => {
   return {
-    date: today.toISOString().split('T')[0],
-    dayOfWeek: today.toLocaleDateString('en-US', { weekday: 'long' }),
-    displayDate: today.toLocaleDateString('en-US', {
+    date: getDateKey(date),
+    dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'long' }),
+    displayDate: date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -31,7 +36,8 @@ const getTodayFormatted = () => {
 
 // Format date for display
 const formatDisplayDate = (dateStr) => {
-  const date = new Date(dateStr);
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -148,7 +154,7 @@ const ChronicleEditor = React.memo(({ initialText, initialMood, onSave, onDelete
 /*                         MAIN SACRED RECORDS COMPONENT                      */
 /* -------------------------------------------------------------------------- */
 export default function SacredRecords() {
-  const todayInfo = useMemo(() => getTodayFormatted(), []);
+  const todayInfo = useMemo(() => getDateInfo(new Date()), []);
   const [entries, setEntries] = useState([]);
   const [viewingEntry, setViewingEntry] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -193,7 +199,7 @@ export default function SacredRecords() {
   // Get entry for selected calendar date
   const selectedDateEntry = useMemo(() => {
     if (!selectedCalendarDate) return null;
-    const dateStr = selectedCalendarDate.toISOString().split('T')[0];
+    const dateStr = getDateKey(selectedCalendarDate);
     return entries.find(entry => entry.date === dateStr);
   }, [entries, selectedCalendarDate]);
 
@@ -238,11 +244,29 @@ export default function SacredRecords() {
         setEntries(updatedEntries);
         setViewingEntry(entryData);
       } else {
-        // Create new entry
+        const entryDate = selectedCalendarDate || new Date();
+        const entryInfo = getDateInfo(entryDate);
+        const existingEntryForDate = entries.find(e => e.date === entryInfo.date);
+
+        if (existingEntryForDate) {
+          entryData = {
+            ...existingEntryForDate,
+            mood: mood?.emoji || existingEntryForDate.mood,
+            text: text.trim(),
+            timestamp: Date.now()
+          };
+          const updatedEntries = entries.map(e => e.id === existingEntryForDate.id ? entryData : e);
+          localStorage.setItem('lumina_journal_entries', JSON.stringify(updatedEntries));
+          setEntries(updatedEntries);
+          setViewingEntry(entryData);
+          return;
+        }
+
+        // Create new entry for the selected calendar date, or today by default
         entryData = {
           id: Date.now(),
-          date: todayInfo.date,
-          dayOfWeek: todayInfo.dayOfWeek,
+          date: entryInfo.date,
+          dayOfWeek: entryInfo.dayOfWeek,
           mood: mood?.emoji || '😐',
           text: text.trim(),
           timestamp: Date.now()
@@ -256,7 +280,7 @@ export default function SacredRecords() {
     } catch (err) {
       console.error('Error saving entry:', err);
     }
-  }, [entries, viewingEntry, todayInfo]);
+  }, [entries, viewingEntry, selectedCalendarDate]);
 
   const handleDeleteEntry = useCallback((entryId) => {
     const idToDelete = entryId || viewingEntry?.id;
@@ -279,7 +303,7 @@ export default function SacredRecords() {
       }
       
       if (selectedCalendarDate) {
-        const dateStr = selectedCalendarDate.toISOString().split('T')[0];
+        const dateStr = getDateKey(selectedCalendarDate);
         const deletedEntry = entries.find(e => e.id === entryToDelete);
         if (deletedEntry && deletedEntry.date === dateStr) {
           setSelectedCalendarDate(null);
@@ -305,7 +329,7 @@ export default function SacredRecords() {
 
   const getMoodForDate = (date) => {
     if (!date) return null;
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = getDateKey(date);
     const entry = entries.find(e => e.date === dateStr);
     return entry ? entry.mood : null;
   };
@@ -405,10 +429,10 @@ export default function SacredRecords() {
       <div style={{ flex: 1, background: 'var(--bg-card)', borderRadius: '24px', padding: '40px', border: '1px solid var(--glass-border)', overflowY: 'auto' }}>
         {viewMode === 'write' ? (
           <ChronicleEditor 
-            key={viewingEntry?.id || 'new'} // Force re-render of local state when entry changes
+            key={viewingEntry?.id || selectedCalendarDate?.getTime() || 'new'} // Force re-render of local state when entry changes
             initialText={viewingEntry?.text || ''}
             initialMood={viewingEntry?.mood || null}
-            displayDate={viewingEntry ? viewingEntry.date : todayInfo.displayDate}
+            displayDate={viewingEntry ? formatDisplayDate(viewingEntry.date) : (selectedCalendarDate ? getDateInfo(selectedCalendarDate).displayDate : todayInfo.displayDate)}
             onSave={handleSaveEntry}
             onDelete={() => handleDeleteEntry(viewingEntry?.id)}
             onNew={startNewEntry}
@@ -440,7 +464,7 @@ export default function SacredRecords() {
               {calendarData.map((date, index) => {
                 if (!date) return <div key={`empty-${index}`} className="calendar-day-cell empty" />;
                 
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = getDateKey(date);
                 const hasEntry = entries.some(e => e.date === dateStr);
                 const mood = getMoodForDate(date);
                 const selected = isSelected(date);
@@ -508,7 +532,7 @@ export default function SacredRecords() {
                 className="selected-entry-preview" 
                 style={{ opacity: 0.7, borderLeft: '1px solid var(--glass-border)' }}
               >
-                <div className="preview-date">{formatDisplayDate(selectedCalendarDate.toISOString())}</div>
+                <div className="preview-date">{getDateInfo(selectedCalendarDate).displayDate}</div>
                 <div className="preview-text">No chronicles recorded for this day.</div>
                 <LuminaButton 
                   variant="primary"
