@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Eye, Zap, Coffee, Book, Image as ImageIcon, Music, History,
-  RefreshCw, Play, Pause, RotateCcw, LayoutGrid, Sun, Moon,
-  Volume2, Plus, X, Heart, BarChart3, Waves, Settings
+  Eye, Zap, Coffee, Book, Image as ImageIcon, History,
+  Play, Pause, LayoutGrid, Sun, Moon,
+  Volume2, Heart, BarChart3, Waves, Settings
 } from 'lucide-react';
 import './index.css';
 import { audioEngine } from './audioEngine';
+
+import LuminaLanding from './components/LuminaLanding';
 import CelestialCanvas from './components/CelestialCanvas';
 import DailyCheckIn, { recordMoodHistory } from './components/DailyCheckIn';
 import { NavItem } from './components/NavItem';
@@ -18,25 +20,24 @@ import { useAffirmations } from './hooks/useAffirmations';
 import Sanctuary from './components/Sanctuary';
 import { LuminaButton } from './components/LuminaButton';
 
-const SidebarItem = NavItem; // Backwards-compatible alias
+const SidebarItem = NavItem;
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [theme, setTheme] = useState('light');
   const [activeTab, setActiveTab] = useState('Sanctuary');
   const [isCustom, setIsCustom] = useState(false);
   const [customMins, setCustomMins] = useState('25');
 
-  // Extracted custom hooks — eliminates prop drilling and stale closures
+
   const timer = useTimer();
   const audio = useAudio();
   const affirmations = useAffirmations();
 
-  // Theme persistence
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Timer controls
   const handleCustomSubmit = useCallback((e) => {
     if (e.key === 'Enter') {
       const mins = parseInt(customMins, 10);
@@ -46,20 +47,15 @@ export default function App() {
     }
   }, [customMins, timer]);
 
-  // Handle mood check-in completion (no-op now that landing removed; DailyCheckIn manages its own visibility)
   const handleCheckInComplete = useCallback(() => {}, []);
 
-  // Apply mood-based suggestions
   const handleApplySuggestion = useCallback((suggestion) => {
-    // Auto-switch audio mode to match mood
     if (suggestion.audioMode && suggestion.audioMode !== audio.audioMode) {
       audio.changeAudioMode(suggestion.audioMode);
     }
-    // Record to mood history for weekly report
     recordMoodHistory(suggestion.mood.id, suggestion.mood.label);
   }, [audio]);
 
-  // Sanctuary props — memoized callbacks prevent unnecessary re-renders
   const sanctuaryProps = {
     currentTime: new Date(),
     currentAffirmation: affirmations.currentAffirmation,
@@ -77,7 +73,6 @@ export default function App() {
     setActiveTab,
   };
 
-  // DeepState props
   const deepStateProps = {
     timeRemaining: timer.timeRemaining,
     timerActive: timer.timerActive,
@@ -96,7 +91,12 @@ export default function App() {
     handleCustomSubmit,
   };
 
+
   return (
+    <AnimatePresence mode="wait">
+      {showLanding ? (
+        <LuminaLanding key="landing" onEnter={() => setShowLanding(false)} />
+      ) : (
     <motion.div
       key="app"
       initial={{ opacity: 0, scale: 0.98 }}
@@ -112,7 +112,7 @@ export default function App() {
 
       <CelestialCanvas theme={theme} />
 
-      {/* Zen Lamp Theme Toggle — accessible */}
+      {/* Zen Lamp Theme Toggle */}
       <div
         className="zen-lamp-container"
         onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
@@ -149,21 +149,21 @@ export default function App() {
           </div>
         </div>
         <nav className="nav-links" aria-label="App sections">
-          <SidebarItem icon={LayoutGrid} label="Sanctuary" active={activeTab === 'Sanctuary'} onClick={() => setActiveTab('Sanctuary')} />
-          <SidebarItem icon={Eye} label="Oracle" active={activeTab === 'Oracle'} onClick={() => setActiveTab('Oracle')} />
-          <SidebarItem icon={Zap} label="Quantum Lab" active={activeTab === 'Quantum Lab'} onClick={() => setActiveTab('Quantum Lab')} />
-          <SidebarItem icon={Coffee} label="Deep State" active={activeTab === 'Deep State'} onClick={() => setActiveTab('Deep State')} />
-          <SidebarItem icon={Book} label="Sacred Records" active={activeTab === 'Sacred Records'} onClick={() => setActiveTab('Sacred Records')} />
-          <SidebarItem icon={ImageIcon} label="Vision Portal" active={activeTab === 'Vision Portal'} onClick={() => setActiveTab('Vision Portal')} />
-          <SidebarItem icon={History} label="Timeline" active={activeTab === 'Timeline'} onClick={() => setActiveTab('Timeline')} />
-          <SidebarItem icon={Heart} label="Affirmations" active={activeTab === 'Affirmations'} onClick={() => setActiveTab('Affirmations')} />
-          <SidebarItem icon={BarChart3} label="Insights" active={activeTab === 'Insights'} onClick={() => setActiveTab('Insights')} />
-          <SidebarItem icon={Waves} label="Focus Lab" active={activeTab === 'Focus Lab'} onClick={() => setActiveTab('Focus Lab')} />
-          <SidebarItem icon={Settings} label="Settings" active={activeTab === 'Settings'} onClick={() => setActiveTab('Settings')} />
+          <SidebarItem icon={LayoutGrid} label="Sanctuary"     active={activeTab === 'Sanctuary'}     onClick={() => setActiveTab('Sanctuary')} />
+          <SidebarItem icon={Eye}        label="Oracle"         active={activeTab === 'Oracle'}         onClick={() => setActiveTab('Oracle')} />
+          <SidebarItem icon={Zap}        label="Quantum Lab"    active={activeTab === 'Quantum Lab'}    onClick={() => setActiveTab('Quantum Lab')} />
+          <SidebarItem icon={Coffee}     label="Deep State"     active={activeTab === 'Deep State'}     onClick={() => setActiveTab('Deep State')} />
+          <SidebarItem icon={Book}       label="Sacred Records" active={activeTab === 'Sacred Records'} onClick={() => setActiveTab('Sacred Records')} />
+          <SidebarItem icon={ImageIcon}  label="Vision Portal"  active={activeTab === 'Vision Portal'}  onClick={() => setActiveTab('Vision Portal')} />
+          <SidebarItem icon={History}    label="Timeline"       active={activeTab === 'Timeline'}       onClick={() => setActiveTab('Timeline')} />
+          <SidebarItem icon={Heart}      label="Affirmations"   active={activeTab === 'Affirmations'}   onClick={() => setActiveTab('Affirmations')} />
+          <SidebarItem icon={BarChart3}  label="Insights"       active={activeTab === 'Insights'}       onClick={() => setActiveTab('Insights')} />
+          <SidebarItem icon={Waves}      label="Focus Lab"      active={activeTab === 'Focus Lab'}      onClick={() => setActiveTab('Focus Lab')} />
+          <SidebarItem icon={Settings}   label="Settings"       active={activeTab === 'Settings'}       onClick={() => setActiveTab('Settings')} />
         </nav>
       </aside>
 
-      {/* Main Content — route rendering via lookup map */}
+      {/* Main Content */}
       <AnimatePresence mode="wait">
         {activeTab === 'Sanctuary' ? (
           <SanctuaryWrapper key="Sanctuary" {...sanctuaryProps} />
@@ -180,7 +180,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Resonance Bar (Footer Audio Controls) */}
+      {/* Resonance Bar – Footer Audio Controls */}
       <footer className="resonance-bar" aria-label="Audio controls">
         <div className="resonance-info">
           <LuminaButton
@@ -196,21 +196,15 @@ export default function App() {
             )}
           </LuminaButton>
           <div className="current-state">
-            <span className="state-label">
-              {audio.isAudioPlaying ? audio.audioMode : 'Silent'}
-            </span>
+            <span className="state-label">{audio.isAudioPlaying ? audio.audioMode : 'Silent'}</span>
             <span className="state-meta">
-              {audio.audioMode === 'Alpha'
-                ? '10Hz'
-                : audio.audioMode === 'Theta'
-                ? '6Hz'
-                : audio.audioMode === 'Gamma'
-                ? '40Hz'
+              {audio.audioMode === 'Alpha' ? '10Hz'
+                : audio.audioMode === 'Theta' ? '6Hz'
+                : audio.audioMode === 'Gamma' ? '40Hz'
                 : '1.5Hz'}
             </span>
           </div>
         </div>
-
         <div className="freq-controls">
           {['Zen', 'Theta', 'Alpha', 'Gamma'].map((m) => (
             <LuminaButton
@@ -240,6 +234,8 @@ export default function App() {
         </div>
       </footer>
     </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -248,7 +244,6 @@ export default function App() {
  * Sanctuary only needs the date (not the time), so we freeze it at mount.
  */
 const SanctuaryWrapper = React.forwardRef((props, ref) => {
-  // Only the date matters for Sanctuary, not the time — update once per day
   const [currentDate] = useState(() => new Date());
   return (
     <motion.main
