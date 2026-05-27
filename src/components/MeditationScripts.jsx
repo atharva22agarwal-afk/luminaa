@@ -2,7 +2,33 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, BookOpen, RefreshCw, Copy, Check } from 'lucide-react';
 import { getTodaysMood } from './DailyCheckIn';
-import { getJournalInsight } from '../services/aiService';
+
+function createOfflineMeditation({ todayMood, intention }) {
+  const moodLine = todayMood
+    ? `I can sense that ${todayMood.label.toLowerCase()} energy is here with you today, and you do not need to push it away.`
+    : 'Whatever you arrived with today is welcome here.';
+  const intentionLine = intention
+    ? `Let your intention, "${intention}", become a quiet light in the background of your attention.`
+    : 'Let one simple intention for this moment become clear, even if it is only to breathe and begin again.';
+
+  return `Find a comfortable position and let your shoulders soften. [pause 5 seconds]
+
+Take a slow breath in through your nose. Hold it gently. Now let it out with no rush. [breathe]
+
+Again, breathe in for four. [pause 4 seconds] And release for six. [pause 6 seconds]
+
+${moodLine} Let it be seen without needing it to take over the whole room.
+
+Bring your attention to your forehead, your jaw, your neck, and your shoulders. Let each place loosen by one small degree. [pause 8 seconds]
+
+${intentionLine}
+
+Imagine that every inhale gives you a little more space, and every exhale clears one unnecessary weight from your body. [pause 10 seconds]
+
+For the next few breaths, there is nowhere else you need to be. You are here. You are breathing. You are allowed to move gently.
+
+When you are ready, feel the surface beneath you, notice the room around you, and return with a calmer mind and a steadier heart.`;
+}
 
 /**
  * AI-Generated Meditation Scripts — generates a personalized guided meditation
@@ -57,13 +83,13 @@ Rules:
 - Do NOT add section headers or explanations — just the flowing script.
 - The tone should feel like a trusted friend guiding them, not a therapist.`;
 
-      const response = await getJournalInsight(prompt);
-
       // getJournalInsight returns a single insight — use askGroq fallback for full script
       // Actually, let's use the raw Groq API directly for a full script
       const API_KEY = import.meta.env.VITE_GROQ_KEY;
       if (!API_KEY) {
-        throw new Error('API key not configured');
+        setScript(createOfflineMeditation({ todayMood, intention }));
+        setError('Using an offline meditation because the AI key is not set.');
+        return;
       }
 
       const fullResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -84,11 +110,14 @@ Rules:
       });
 
       const data = await fullResponse.json();
-      if (!data.choices) throw new Error('Generation failed');
+      if (!fullResponse.ok || !data.choices) throw new Error(data.error?.message || 'Generation failed');
       setScript(data.choices[0].message.content);
     } catch (e) {
       console.error('Meditation script generation failed:', e);
-      setError('Could not connect to the Oracle. Please check your API key and try again.');
+      const todayMood = getTodaysMood();
+      const intention = localStorage.getItem('lumina_primary_intention') || '';
+      setScript(createOfflineMeditation({ todayMood, intention }));
+      setError('AI meditation is unavailable right now, so I made an offline script for you.');
     } finally {
       setIsGenerating(false);
     }

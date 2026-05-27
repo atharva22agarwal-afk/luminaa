@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Plus, X, Play, Pause, RotateCcw, ArrowUpRight, Sparkles, Activity } from 'lucide-react';
 import { LuminaButton } from './LuminaButton';
+import Tooltip from '../Tooltip';
 
 export default function Sanctuary({ 
   currentTime, 
@@ -91,17 +92,21 @@ export default function Sanctuary({
             </AnimatePresence>
             
             <div className="hero-controls">
-              <LuminaButton onClick={refreshAffirmation} variant="circle" title="Refresh Alignment">
-                <RefreshCw size={20} />
-              </LuminaButton>
-              <LuminaButton 
-                onClick={toggleAffirmationPanel} 
-                variant="circle"
-                active={isAffirmationPanelOpen}
-                title="Anchor New Affirmation"
-              >
-                {isAffirmationPanelOpen ? <X size={20} /> : <Plus size={20} />}
-              </LuminaButton>
+              <Tooltip description="Get a new affirmation" position="top">
+                <LuminaButton onClick={refreshAffirmation} variant="circle" aria-label="Get a new affirmation">
+                  <RefreshCw size={20} />
+                </LuminaButton>
+              </Tooltip>
+              <Tooltip description={isAffirmationPanelOpen ? 'Close affirmation editor' : 'Add your own affirmation'} position="top">
+                <LuminaButton 
+                  onClick={toggleAffirmationPanel} 
+                  variant="circle"
+                  active={isAffirmationPanelOpen}
+                  aria-label={isAffirmationPanelOpen ? 'Close affirmation editor' : 'Add your own affirmation'}
+                >
+                  {isAffirmationPanelOpen ? <X size={20} /> : <Plus size={20} />}
+                </LuminaButton>
+              </Tooltip>
             </div>
           </div>
 
@@ -130,10 +135,10 @@ export default function Sanctuary({
             <ArrowUpRight size={18} className="corner-icon" />
           </motion.div>
 
-          {/* Deep State Sync (Timer) */}
+          {/* Flow Lab Sync (Timer) */}
           <motion.div 
             whileHover={{ scale: 1.02 }}
-            onClick={() => setActiveTab('Deep State')}
+            onClick={() => setActiveTab('Flow Lab')}
             className={`organic-card timer-portal ${timerActive ? 'resonating' : ''}`}
             style={{ cursor: 'pointer' }}
           >
@@ -155,12 +160,16 @@ export default function Sanctuary({
             </div>
             
             <div className="timer-ritual-controls">
-              <LuminaButton onClick={(e) => { e.stopPropagation(); toggleTimer(); }} variant="icon">
-                {timerActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
-              </LuminaButton>
-              <LuminaButton onClick={(e) => { e.stopPropagation(); resetTimer(); }} variant="icon" size="sm">
-                <RotateCcw size={16} />
-              </LuminaButton>
+              <Tooltip description={timerActive ? 'Stop your session' : 'Start your session'} position="left">
+                <LuminaButton onClick={(e) => { e.stopPropagation(); toggleTimer(); }} variant="icon" aria-label={timerActive ? 'Stop your session' : 'Start your session'}>
+                  {timerActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                </LuminaButton>
+              </Tooltip>
+              <Tooltip description="Start timer over" position="left">
+                <LuminaButton onClick={(e) => { e.stopPropagation(); resetTimer(); }} variant="icon" size="sm" aria-label="Start timer over">
+                  <RotateCcw size={16} />
+                </LuminaButton>
+              </Tooltip>
             </div>
           </motion.div>
 

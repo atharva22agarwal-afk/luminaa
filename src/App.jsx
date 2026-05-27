@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, Zap, Coffee, Book, Image as ImageIcon, History,
   Play, Pause, LayoutGrid, Sun, Moon,
-  Volume2, Heart, BarChart3, Waves, Settings
+  Volume2, Heart, BarChart3, Settings
 } from 'lucide-react';
 import './index.css';
 import { audioEngine } from './audioEngine';
+import Tooltip from './Tooltip';
 
 import LuminaLanding from './components/LuminaLanding';
 import CelestialCanvas from './components/CelestialCanvas';
@@ -113,29 +114,31 @@ export default function App() {
       <CelestialCanvas theme={theme} />
 
       {/* Zen Lamp Theme Toggle */}
-      <div
-        className="zen-lamp-container"
-        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-        role="button"
-        tabIndex={0}
-        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setTheme(theme === 'light' ? 'dark' : 'light');
-          }
-        }}
-      >
-        <div className="lamp-base">
-          {theme === 'light' ? (
-            <Sun size={18} aria-hidden="true" />
-          ) : (
-            <Moon size={18} fill="currentColor" className="moon-icon" aria-hidden="true" />
-          )}
+      <Tooltip description={theme === 'light' ? 'Dark mode' : 'Light mode'} position="left" className="zen-lamp-tooltip">
+        <div
+          className="zen-lamp-container"
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          role="button"
+          tabIndex={0}
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setTheme(theme === 'light' ? 'dark' : 'light');
+            }
+          }}
+        >
+          <div className="lamp-base">
+            {theme === 'light' ? (
+              <Sun size={18} aria-hidden="true" />
+            ) : (
+              <Moon size={18} fill="currentColor" className="moon-icon" aria-hidden="true" />
+            )}
+          </div>
+          <div className="lamp-cord" aria-hidden="true" />
+          <div className="lamp-pull" aria-hidden="true" />
         </div>
-        <div className="lamp-cord" aria-hidden="true" />
-        <div className="lamp-pull" aria-hidden="true" />
-      </div>
+      </Tooltip>
 
       {/* Sidebar Navigation */}
       <aside className="sidebar" aria-label="Main navigation">
@@ -149,17 +152,16 @@ export default function App() {
           </div>
         </div>
         <nav className="nav-links" aria-label="App sections">
-          <SidebarItem icon={LayoutGrid} label="Sanctuary"     active={activeTab === 'Sanctuary'}     onClick={() => setActiveTab('Sanctuary')} />
-          <SidebarItem icon={Eye}        label="Oracle"         active={activeTab === 'Oracle'}         onClick={() => setActiveTab('Oracle')} />
-          <SidebarItem icon={Zap}        label="Quantum Lab"    active={activeTab === 'Quantum Lab'}    onClick={() => setActiveTab('Quantum Lab')} />
-          <SidebarItem icon={Coffee}     label="Deep State"     active={activeTab === 'Deep State'}     onClick={() => setActiveTab('Deep State')} />
-          <SidebarItem icon={Book}       label="Sacred Records" active={activeTab === 'Sacred Records'} onClick={() => setActiveTab('Sacred Records')} />
-          <SidebarItem icon={ImageIcon}  label="Vision Portal"  active={activeTab === 'Vision Portal'}  onClick={() => setActiveTab('Vision Portal')} />
-          <SidebarItem icon={History}    label="Timeline"       active={activeTab === 'Timeline'}       onClick={() => setActiveTab('Timeline')} />
-          <SidebarItem icon={Heart}      label="Affirmations"   active={activeTab === 'Affirmations'}   onClick={() => setActiveTab('Affirmations')} />
-          <SidebarItem icon={BarChart3}  label="Insights"       active={activeTab === 'Insights'}       onClick={() => setActiveTab('Insights')} />
-          <SidebarItem icon={Waves}      label="Focus Lab"      active={activeTab === 'Focus Lab'}      onClick={() => setActiveTab('Focus Lab')} />
-          <SidebarItem icon={Settings}   label="Settings"       active={activeTab === 'Settings'}       onClick={() => setActiveTab('Settings')} />
+          <SidebarItem icon={LayoutGrid} label="Sanctuary"     tooltip="Home page with daily affirmations" active={activeTab === 'Sanctuary'}     onClick={() => setActiveTab('Sanctuary')} />
+          <SidebarItem icon={Eye}        label="Oracle"         tooltip="Get AI advice and guidance" active={activeTab === 'Oracle'}         onClick={() => setActiveTab('Oracle')} />
+          <SidebarItem icon={Zap}        label="Quantum Lab"    tooltip="Advanced tools and experiments" active={activeTab === 'Quantum Lab'}    onClick={() => setActiveTab('Quantum Lab')} />
+          <SidebarItem icon={Coffee}     label="Flow Lab"       tooltip="Timer, audio, and meditations" active={activeTab === 'Flow Lab'}       onClick={() => setActiveTab('Flow Lab')} />
+          <SidebarItem icon={Book}       label="Sacred Records" tooltip="Write and read your journal" active={activeTab === 'Sacred Records'} onClick={() => setActiveTab('Sacred Records')} />
+          <SidebarItem icon={ImageIcon}  label="Vision Portal"  tooltip="Create vision boards and images" active={activeTab === 'Vision Portal'}  onClick={() => setActiveTab('Vision Portal')} />
+          <SidebarItem icon={History}    label="Timeline"       tooltip="See all your past activity" active={activeTab === 'Timeline'}       onClick={() => setActiveTab('Timeline')} />
+          <SidebarItem icon={Heart}      label="Affirmations"   tooltip="Read calming affirmations" active={activeTab === 'Affirmations'}   onClick={() => setActiveTab('Affirmations')} />
+          <SidebarItem icon={BarChart3}  label="Insights"       tooltip="See your progress patterns" active={activeTab === 'Insights'}       onClick={() => setActiveTab('Insights')} />
+          <SidebarItem icon={Settings}   label="Settings"       tooltip="Change your app settings" active={activeTab === 'Settings'}       onClick={() => setActiveTab('Settings')} />
         </nav>
       </aside>
 
@@ -183,18 +185,20 @@ export default function App() {
       {/* Resonance Bar – Footer Audio Controls */}
       <footer className="resonance-bar" aria-label="Audio controls">
         <div className="resonance-info">
-          <LuminaButton
-            variant="icon"
-            onClick={audio.toggleAudio}
-            aria-label={audio.isAudioPlaying ? 'Pause audio' : 'Play audio'}
-            aria-pressed={audio.isAudioPlaying}
-          >
-            {audio.isAudioPlaying ? (
-              <Pause size={20} fill="currentColor" aria-hidden="true" />
-            ) : (
-              <Play size={20} fill="currentColor" aria-hidden="true" />
-            )}
-          </LuminaButton>
+          <Tooltip description={audio.isAudioPlaying ? 'Stop audio' : 'Start audio'} position="top">
+            <LuminaButton
+              variant="icon"
+              onClick={audio.toggleAudio}
+              aria-label={audio.isAudioPlaying ? 'Pause audio' : 'Play audio'}
+              aria-pressed={audio.isAudioPlaying}
+            >
+              {audio.isAudioPlaying ? (
+                <Pause size={20} fill="currentColor" aria-hidden="true" />
+              ) : (
+                <Play size={20} fill="currentColor" aria-hidden="true" />
+              )}
+            </LuminaButton>
+          </Tooltip>
           <div className="current-state">
             <span className="state-label">{audio.isAudioPlaying ? audio.audioMode : 'Silent'}</span>
             <span className="state-meta">
@@ -207,30 +211,37 @@ export default function App() {
         </div>
         <div className="freq-controls">
           {['Zen', 'Theta', 'Alpha', 'Gamma'].map((m) => (
-            <LuminaButton
+            <Tooltip
               key={m}
-              variant={audio.audioMode === m ? 'primary' : 'secondary'}
-              onClick={() => audio.changeAudioMode(m)}
-              className="freq-btn"
-              aria-pressed={audio.audioMode === m}
-              aria-label={`Switch to ${m} frequency`}
+              description={`${m} - ${m === 'Alpha' ? '10Hz' : m === 'Theta' ? '6Hz' : m === 'Gamma' ? '40Hz' : '1.5Hz'}`}
+              position="top"
             >
-              {m}
-            </LuminaButton>
+              <LuminaButton
+                variant={audio.audioMode === m ? 'primary' : 'secondary'}
+                onClick={() => audio.changeAudioMode(m)}
+                className="freq-btn"
+                aria-pressed={audio.audioMode === m}
+                aria-label={`Switch to ${m} frequency`}
+              >
+                {m}
+              </LuminaButton>
+            </Tooltip>
           ))}
-          <div className="volume-slider-container">
-            <Volume2 size={16} className="volume-icon" aria-hidden="true" />
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              defaultValue="0.5"
-              onChange={(e) => audioEngine.setVolume(e.target.value)}
-              className="premium-slider"
-              aria-label="Volume"
-            />
-          </div>
+          <Tooltip description="Control volume" position="top" className="volume-tooltip">
+            <div className="volume-slider-container">
+              <Volume2 size={16} className="volume-icon" aria-hidden="true" />
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                defaultValue="0.5"
+                onChange={(e) => audioEngine.setVolume(e.target.value)}
+                className="premium-slider"
+                aria-label="Volume"
+              />
+            </div>
+          </Tooltip>
         </div>
       </footer>
     </motion.div>

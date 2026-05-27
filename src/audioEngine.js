@@ -12,6 +12,7 @@ class SacredAudioEngine {
     this.noiseNode = null;
     this.gainNode = null;
     this.noiseGain = null;
+    this.layerGainNode = null;
     this.isPlaying = false;
     this.masterVolume = 0.3;
     this._stopTimeoutId = null;
@@ -37,6 +38,19 @@ class SacredAudioEngine {
     this.noiseGain = this.context.createGain();
     this.noiseGain.gain.setValueAtTime(0.05, this.context.currentTime);
     this.noiseGain.connect(this.gainNode);
+
+    // Soundscape layers need their own output so they work without binaural beats.
+    this.layerGainNode = this.context.createGain();
+    this.layerGainNode.gain.setValueAtTime(this.masterVolume, this.context.currentTime);
+    this.layerGainNode.connect(this.context.destination);
+  }
+
+  resume() {
+    this.init();
+    if (this.context.state === 'suspended') {
+      return this.context.resume();
+    }
+    return Promise.resolve();
   }
 
   createBrownNoise() {
@@ -88,7 +102,7 @@ class SacredAudioEngine {
 
     noiseNode.connect(filter);
     filter.connect(rainGain);
-    rainGain.connect(this.gainNode);
+    rainGain.connect(this.layerGainNode);
 
     return { noiseNode, rainGain };
   }
@@ -104,7 +118,7 @@ class SacredAudioEngine {
     const bowlGain = this.context.createGain();
     bowlGain.gain.setValueAtTime(0, this.context.currentTime);
     bowlGain.gain.linearRampToValueAtTime(volume, this.context.currentTime + 3);
-    bowlGain.connect(this.gainNode);
+    bowlGain.connect(this.layerGainNode);
 
     const oscillators = frequencies.map((freq) => {
       const osc = this.context.createOscillator();
@@ -131,7 +145,7 @@ class SacredAudioEngine {
     const padGain = this.context.createGain();
     padGain.gain.setValueAtTime(0, this.context.currentTime);
     padGain.gain.linearRampToValueAtTime(volume, this.context.currentTime + 4);
-    padGain.connect(this.gainNode);
+    padGain.connect(this.layerGainNode);
 
     const oscillators = frequencies.map((freq) => {
       const osc = this.context.createOscillator();
@@ -164,6 +178,7 @@ class SacredAudioEngine {
    */
   startLayer(layerId, volume = 0.15) {
     this.init();
+    this.resume();
     const layer = this.layers[layerId];
     if (!layer || layer.active) return;
 
@@ -236,10 +251,16 @@ class SacredAudioEngine {
    */
   setLayerVolume(layerId, volume) {
     const layer = this.layers[layerId];
-    if (!layer || !layer.active || !layer.gain || !this.context) return;
+    const nextVolume = parseFloat(volume);
+    if (!layer || Number.isNaN(nextVolume)) return;
+    if (!layer.active) {
+      this.startLayer(layerId, nextVolume);
+      return;
+    }
+    if (!layer.gain || !this.context) return;
 
-    layer.volume = volume;
-    layer.gain.gain.setTargetAtTime(volume, this.context.currentTime, 0.1);
+    layer.volume = nextVolume;
+    layer.gain.gain.setTargetAtTime(nextVolume, this.context.currentTime, 0.1);
   }
 
   /**
@@ -326,9 +347,12 @@ class SacredAudioEngine {
   }
 
   setVolume(val) {
-    this.masterVolume = val;
+    this.masterVolume = parseFloat(val);
     if (this.gainNode) {
-        this.gainNode.gain.setTargetAtTime(val, this.context.currentTime, 0.1);
+      this.gainNode.gain.setTargetAtTime(this.masterVolume, this.context.currentTime, 0.1);
+    }
+    if (this.layerGainNode) {
+      this.layerGainNode.gain.setTargetAtTime(this.masterVolume, this.context.currentTime, 0.1);
     }
   }
 }

@@ -2,6 +2,7 @@
   position: fixed;
   inset: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   background: #09110f;
   color: #fbfcfa;
   display: flex;
@@ -175,6 +176,7 @@
 @media (max-width: 720px) {
   .landing-container {
     align-items: flex-end;
+    overflow-y: auto;
   }
 
   .landing-overlay {
@@ -196,7 +198,7 @@
   .landing-content {
     width: 100%;
     margin: 0;
-    padding: 0 22px 48px;
+    padding: 96px 22px 48px;
   }
 
   .brand-title {
@@ -214,5 +216,59 @@
   .landing-highlights {
     margin-top: 30px;
     gap: 10px 16px;
+  }
+}
+
+@media (max-width: 390px) {
+  .landing-mark {
+    letter-spacing: 0.04em;
+  }
+
+  .landing-nav-btn {
+    padding: 0 12px;
+    font-size: 0.9rem;
+  }
+
+  .brand-title {
+    font-size: clamp(3.2rem, 21vw, 4.8rem);
+  }
+
+  .brand-tagline {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .landing-highlights {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .landing-container {
+    align-items: center;
+    overflow-y: auto;
+  }
+
+  .landing-content {
+    padding-top: 84px;
+    padding-bottom: 28px;
+  }
+
+  .brand-title {
+    font-size: clamp(3rem, 13vw, 5rem);
+  }
+
+  .brand-tagline {
+    margin-top: 16px;
+    line-height: 1.45;
+  }
+
+  .landing-actions {
+    margin-top: 22px;
+  }
+
+  .landing-highlights {
+    margin-top: 22px;
   }
 }

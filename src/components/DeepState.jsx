@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Volume2, Music, Zap, Activity, Square } from 'lucide-react';
+import { Play, Pause, RotateCcw, Music, Square } from 'lucide-react';
 import LuminaButton from './LuminaButton';
+import Tooltip from '../Tooltip';
+import AudioLayerMixer from './AudioLayerMixer';
+import MeditationScripts from './MeditationScripts';
 
 const MODE_QUOTES = {
   Zen:   ["\"Stillness is where creation and solutions are found.\"", "\"In the depth of winter, I finally learned there was in me an invincible summer.\"", "\"The quieter you become, the more you are able to hear.\""],
@@ -32,6 +35,7 @@ export default function DeepState({
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }}
+      className="deep-state-page"
       style={{ 
         minHeight: '100%', 
         display: 'flex', 
@@ -41,22 +45,25 @@ export default function DeepState({
         paddingTop: '60px',
         gap: '40px',
         position: 'relative',
-        paddingBottom: '200px'
+        paddingBottom: '80px'
       }}
     >
       {/* IMMERSIVE HEADER */}
       <div style={{ textAlign: 'center' }}>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2.5rem', fontWeight: 700, letterSpacing: '4px', marginBottom: '8px' }}>
-          Deep State
+          Flow Lab
         </h1>
         <p style={{ textTransform: 'uppercase', letterSpacing: '4px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-          {timerActive ? 'Neutralizing Distractions' : 'Awaiting Intention'}
+          {timerActive ? 'Focused session active' : 'Build your focus session'}
         </p>
       </div>
 
+      <div className="flow-lab-primary">
+        <section className="flow-lab-session">
       {/* GIANT TICKING CLOCK */}
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="deep-state-clock-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
          <motion.div 
+           className="deep-state-clock"
            animate={{ scale: timerActive ? [1, 1.02, 1] : 1 }}
            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
            style={{ 
@@ -73,6 +80,7 @@ export default function DeepState({
          </motion.div>
          
          <motion.div 
+           className="deep-state-glow"
            animate={{ opacity: timerActive ? [0.1, 0.3, 0.1] : 0.05 }}
            transition={{ duration: 4, repeat: Infinity }}
            style={{ 
@@ -88,23 +96,26 @@ export default function DeepState({
       </div>
 
       {/* TIMER PRESETS & CUSTOM */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'center', zIndex: 10 }}>
+      <div className="deep-state-presets" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'center', zIndex: 10 }}>
         {[15, 25, 45, 60].map(p => (
-          <LuminaButton 
-            key={p} 
-            onClick={() => { setIsCustom(false); changeTimer(p); }} 
-            variant={timeRemaining / 60 === p ? 'primary' : 'secondary'}
-            style={{ minWidth: '80px' }}
-          >
-            {p}m
-          </LuminaButton>
+          <Tooltip key={p} description={`${p} minutes`} position="top">
+            <LuminaButton 
+              onClick={() => { setIsCustom(false); changeTimer(p); }} 
+              variant={timeRemaining / 60 === p ? 'primary' : 'secondary'}
+              style={{ minWidth: '80px' }}
+            >
+              {p}m
+            </LuminaButton>
+          </Tooltip>
         ))}
-        <LuminaButton 
-          onClick={() => setIsCustom(!isCustom)}
-          variant={isCustom ? 'primary' : 'secondary'}
-        >
-          Custom Vessel
-        </LuminaButton>
+        <Tooltip description="Enter your own time" position="top">
+          <LuminaButton 
+            onClick={() => setIsCustom(!isCustom)}
+            variant={isCustom ? 'primary' : 'secondary'}
+          >
+            Custom Vessel
+          </LuminaButton>
+        </Tooltip>
       </div>
 
       {isCustom && (
@@ -150,51 +161,65 @@ export default function DeepState({
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '40px', zIndex: 10 }}>
         
         {/* BUTTON PORTAL */}
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-          <LuminaButton 
-            onClick={() => setTimerActive(!timerActive)}
-            variant="circle"
-            style={{ width: '80px', height: '80px' }}
-          >
-            {timerActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" style={{ marginLeft: '6px' }} />}
-          </LuminaButton>
+        <div className="deep-state-main-controls" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+          <Tooltip description={timerActive ? 'Stop your session' : 'Start your session'} position="top">
+            <LuminaButton 
+              onClick={() => setTimerActive(!timerActive)}
+              variant="circle"
+              style={{ width: '80px', height: '80px' }}
+              aria-label={timerActive ? 'Stop your session' : 'Start your session'}
+            >
+              {timerActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" style={{ marginLeft: '6px' }} />}
+            </LuminaButton>
+          </Tooltip>
 
-          <LuminaButton 
-            onClick={resetTimer}
-            variant="icon"
-            style={{ width: '60px', height: '60px' }}
-          >
-            <RotateCcw size={28} />
-          </LuminaButton>
+          <Tooltip description="Start timer over" position="top">
+            <LuminaButton 
+              onClick={resetTimer}
+              variant="icon"
+              style={{ width: '60px', height: '60px' }}
+              aria-label="Start timer over"
+            >
+              <RotateCcw size={28} />
+            </LuminaButton>
+          </Tooltip>
         </div>
 
         {/* FREQUENCY SHIFTER */}
-        <div style={{ background: 'var(--bg-card)', padding: '10px 20px', borderRadius: '40px', border: '1px solid var(--glass-border)', boxShadow: 'var(--card-shadow)', display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <LuminaButton 
-            onClick={toggleAudio}
-            variant={isAudioPlaying ? 'primary' : 'icon'}
-            style={{ width: '40px', height: '40px' }}
-          >
-             {isAudioPlaying ? <Square size={16} fill="currentColor" /> : <Music size={18} />}
-          </LuminaButton>
+        <div className="deep-state-frequency" style={{ background: 'var(--bg-card)', padding: '10px 20px', borderRadius: '40px', border: '1px solid var(--glass-border)', boxShadow: 'var(--card-shadow)', display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <Tooltip description={isAudioPlaying ? 'Stop audio' : 'Start audio'} position="top">
+            <LuminaButton 
+              onClick={toggleAudio}
+              variant={isAudioPlaying ? 'primary' : 'icon'}
+              style={{ width: '40px', height: '40px' }}
+              aria-label={isAudioPlaying ? 'Stop audio' : 'Start audio'}
+            >
+               {isAudioPlaying ? <Square size={16} fill="currentColor" /> : <Music size={18} />}
+            </LuminaButton>
+          </Tooltip>
 
           <div style={{ height: '24px', width: '1px', background: 'var(--glass-border)' }}></div>
 
           {['Zen', 'Theta', 'Alpha', 'Gamma'].map(mode => (
-            <LuminaButton 
+            <Tooltip
               key={mode}
-              onClick={() => changeAudioMode(mode)}
-              variant={audioMode === mode ? 'secondary' : 'ghost'}
-              style={{ padding: '8px 16px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}
+              description={`${mode} - ${mode === 'Alpha' ? '10Hz' : mode === 'Theta' ? '6Hz' : mode === 'Gamma' ? '40Hz' : '1.5Hz'}`}
+              position="top"
             >
-              {mode}
-            </LuminaButton>
+              <LuminaButton 
+                onClick={() => changeAudioMode(mode)}
+                variant={audioMode === mode ? 'secondary' : 'ghost'}
+                style={{ padding: '8px 16px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}
+              >
+                {mode}
+              </LuminaButton>
+            </Tooltip>
           ))}
         </div>
       </div>
 
-      {/* QUOTE DECK — shifts with audio mode */}
-      <div style={{ position: 'absolute', bottom: '20px', textAlign: 'center', width: '100%', maxWidth: '600px', left: '50%', transform: 'translateX(-50%)' }}>
+      {/* QUOTE DECK - shifts with audio mode */}
+      <div style={{ textAlign: 'center', width: '100%', maxWidth: '600px' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={audioMode}
@@ -213,6 +238,16 @@ export default function DeepState({
             </p>
           </motion.div>
         </AnimatePresence>
+      </div>
+        </section>
+
+        <section className="flow-lab-soundscape" aria-label="Soundscape mixer">
+          <AudioLayerMixer />
+        </section>
+      </div>
+
+      <div className="flow-lab-tools">
+        <MeditationScripts />
       </div>
 
     </motion.div>

@@ -8,7 +8,6 @@ import Sanctuary from './components/Sanctuary';
 import Timeline from './components/Timeline';
 import Affirmations from './components/Affirmations';
 import Insights from './components/Insights';
-import FocusLab from './components/FocusLab';
 import SettingsPage from './components/SettingsPage';
 
 /**
@@ -19,14 +18,15 @@ import SettingsPage from './components/SettingsPage';
 export const routeComponents = {
   Sanctuary: (props) => <Sanctuary {...props} />,
   'Quantum Lab': (props) => <ManifestLab {...props} />,
+  'Flow Lab': (props) => <DeepState {...props} />,
   'Deep State': (props) => <DeepState {...props} />,
+  'Focus Lab': (props) => <DeepState {...props} />,
   'Sacred Records': () => <SacredRecords />,
   Oracle: () => <Oracle />,
   'Vision Portal': () => <VisionPortal />,
   Timeline: () => <Timeline />,
   Affirmations: () => <Affirmations />,
   Insights: () => <Insights />,
-  'Focus Lab': () => <FocusLab />,
   Settings: () => <SettingsPage />,
 };
 

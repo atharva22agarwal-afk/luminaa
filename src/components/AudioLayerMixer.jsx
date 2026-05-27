@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Cloud, Wind, Droplets, Music, Waves } from 'lucide-react';
+import { Cloud, Wind, Droplets, Play, Square, Waves } from 'lucide-react';
 import { audioEngine } from '../audioEngine';
 
 const LAYERS = [
@@ -46,7 +46,7 @@ export default function AudioLayerMixer() {
       audioEngine.stopLayer(layerId);
       setActiveLayers(prev => ({
         ...prev,
-        [layerId]: { ...prev[layerId], active: false },
+        [layerId]: { ...prev[layerId], active: false, volume: 0 },
       }));
     } else {
       const defaultVol = LAYERS.find(l => l.id === layerId)?.defaultVolume || 0.1;
@@ -59,14 +59,63 @@ export default function AudioLayerMixer() {
   }, [activeLayers]);
 
   const setLayerVolume = useCallback((layerId, volume) => {
-    audioEngine.setLayerVolume(layerId, volume);
+    const nextVolume = parseFloat(volume);
+    if (Number.isNaN(nextVolume)) return;
+
+    if (nextVolume <= 0) {
+      audioEngine.stopLayer(layerId);
+      setActiveLayers(prev => ({
+        ...prev,
+        [layerId]: { ...prev[layerId], active: false, volume: 0 },
+      }));
+      return;
+    }
+
+    const layer = activeLayers[layerId];
+    if (!layer?.active) {
+      audioEngine.startLayer(layerId, nextVolume);
+    } else {
+      audioEngine.setLayerVolume(layerId, nextVolume);
+    }
+
     setActiveLayers(prev => ({
       ...prev,
-      [layerId]: { ...prev[layerId], volume: parseFloat(volume) },
+      [layerId]: { ...prev[layerId], active: true, volume: nextVolume },
     }));
-  }, []);
+  }, [activeLayers]);
 
   const anyActive = Object.values(activeLayers).some(l => l.active);
+
+  const startMixer = useCallback(() => {
+    const nextLayers = {};
+
+    LAYERS.forEach((layer) => {
+      const volume = activeLayers[layer.id]?.volume || layer.defaultVolume;
+      audioEngine.startLayer(layer.id, volume);
+      nextLayers[layer.id] = { active: true, volume };
+    });
+
+    setActiveLayers(prev => ({ ...prev, ...nextLayers }));
+  }, [activeLayers]);
+
+  const stopMixer = useCallback(() => {
+    const nextLayers = {};
+
+    LAYERS.forEach((layer) => {
+      audioEngine.stopLayer(layer.id);
+      nextLayers[layer.id] = { ...(activeLayers[layer.id] || {}), active: false, volume: 0 };
+    });
+
+    setActiveLayers(prev => ({ ...prev, ...nextLayers }));
+  }, [activeLayers]);
+
+  const toggleMixer = useCallback(() => {
+    if (anyActive) {
+      stopMixer();
+    } else {
+      startMixer();
+    }
+  }, [anyActive, startMixer, stopMixer]);
 
   return (
     <div style={{
@@ -88,9 +137,32 @@ export default function AudioLayerMixer() {
         }}>
           Soundscape Mixer
         </h3>
+        <button
+          onClick={toggleMixer}
+          style={{
+            marginLeft: 'auto',
+            minHeight: '34px',
+            padding: '0 14px',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
+            background: anyActive ? 'var(--text-main)' : 'var(--sage-green)',
+            color: anyActive ? 'var(--offwhite)' : 'white',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}
+          aria-label={anyActive ? 'Stop soundscape mixer' : 'Start soundscape mixer'}
+        >
+          {anyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+          {anyActive ? 'Stop' : 'Start'}
+        </button>
         {anyActive && (
           <span style={{
-            marginLeft: 'auto',
             fontSize: '0.6rem',
             padding: '3px 8px',
             borderRadius: '8px',
@@ -108,7 +180,8 @@ export default function AudioLayerMixer() {
         {LAYERS.map((layer) => {
           const Icon = layer.icon;
           const isActive = activeLayers[layer.id]?.active;
-          const volume = activeLayers[layer.id]?.volume || layer.defaultVolume;
+          const volume = activeLayers[layer.id]?.volume ?? 0;
+          const displayVolume = isActive ? volume : 0;
 
           return (
             <motion.div
@@ -142,11 +215,12 @@ export default function AudioLayerMixer() {
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                 }}
-                aria-label={`Toggle ${layer.label} layer`}
-                aria-pressed={isActive}
-              >
-                <Icon size={18} />
-              </button>
+                  aria-label={`Toggle ${layer.label} layer`}
+                  aria-pressed={isActive}
+                  title={isActive ? `Stop ${layer.label}` : `Start ${layer.label}`}
+                >
+                  <Icon size={18} />
+                </button>
 
               {/* Label + Volume Slider */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -171,16 +245,15 @@ export default function AudioLayerMixer() {
                   min="0"
                   max="0.5"
                   step="0.01"
-                  value={volume}
+                  value={displayVolume}
                   onChange={(e) => setLayerVolume(layer.id, e.target.value)}
-                  disabled={!isActive}
                   style={{
                     width: '100%',
                     height: '4px',
                     borderRadius: '2px',
                     accentColor: 'var(--sage-green)',
-                    opacity: isActive ? 1 : 0.3,
-                    cursor: isActive ? 'pointer' : 'default',
+                    opacity: isActive ? 1 : 0.55,
+                    cursor: 'pointer',
                   }}
                   aria-label={`${layer.label} volume`}
                 />
@@ -194,7 +267,7 @@ export default function AudioLayerMixer() {
                 color: isActive ? 'var(--sage-green)' : 'var(--text-muted)',
                 fontVariantNumeric: 'tabular-nums',
               }}>
-                {Math.round(volume * 100)}%
+                {Math.round(displayVolume * 100)}%
               </div>
             </motion.div>
           );
