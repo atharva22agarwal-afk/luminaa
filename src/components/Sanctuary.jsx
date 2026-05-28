@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Plus, X, Play, Pause, RotateCcw, ArrowUpRight, Sparkles, Activity } from 'lucide-react';
+import { RefreshCw, Plus, X, Play, Pause, RotateCcw, ArrowUpRight, Sparkles, Activity, Info } from 'lucide-react';
 import { LuminaButton } from './LuminaButton';
 import Tooltip from '../Tooltip';
 
@@ -22,6 +22,9 @@ export default function Sanctuary({
 }) {
   const [frequencyData, setFrequencyData] = useState([]);
   const [visionBoard, setVisionBoard] = useState([]);
+  const [sanctuaryVisionId, setSanctuaryVisionId] = useState('');
+  const [isVisionHidden, setIsVisionHidden] = useState(false);
+  const [showSanctuaryHint, setShowSanctuaryHint] = useState(false);
 
   useEffect(() => {
     const loadFreq = () => setFrequencyData(JSON.parse(localStorage.getItem('lumina_frequency_history') || '[]'));
@@ -31,7 +34,11 @@ export default function Sanctuary({
   }, []);
 
   useEffect(() => {
-    const loadBoard = () => setVisionBoard(JSON.parse(localStorage.getItem('lumina_vision_board') || '[]'));
+    const loadBoard = () => {
+      setVisionBoard(JSON.parse(localStorage.getItem('lumina_vision_board') || '[]'));
+      setSanctuaryVisionId(localStorage.getItem('lumina_sanctuary_vision_id') || '');
+      setIsVisionHidden(localStorage.getItem('lumina_sanctuary_vision_hidden') === 'true');
+    };
     loadBoard();
     window.addEventListener('storage', loadBoard);
     window.addEventListener('lumina_vision_board_updated', loadBoard);
@@ -39,6 +46,18 @@ export default function Sanctuary({
       window.removeEventListener('storage', loadBoard);
       window.removeEventListener('lumina_vision_board_updated', loadBoard);
     };
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem('lumina_sanctuary_hint_seen')) return undefined;
+
+    setShowSanctuaryHint(true);
+    const timer = window.setTimeout(() => {
+      setShowSanctuaryHint(false);
+      localStorage.setItem('lumina_sanctuary_hint_seen', 'true');
+    }, 6500);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const generateChartPath = () => {
@@ -54,7 +73,15 @@ export default function Sanctuary({
     return `M ${points.join(' L ')}`;
   };
 
-  const latestVision = visionBoard[0];
+  const selectedVision = visionBoard.find((item) => String(item.id) === sanctuaryVisionId);
+  const latestVision = isVisionHidden ? null : selectedVision || visionBoard[0];
+
+  const hideSanctuaryVision = (e) => {
+    e.stopPropagation();
+    localStorage.setItem('lumina_sanctuary_vision_hidden', 'true');
+    setIsVisionHidden(true);
+    window.dispatchEvent(new Event('lumina_vision_board_updated'));
+  };
 
   return (
     <motion.div 
@@ -67,17 +94,59 @@ export default function Sanctuary({
       <div className="sanctuary-aurora" />
 
       <header className="divine-header">
-        <div className="header-ritual">
-          <motion.div 
-            initial={{ width: 0 }} 
-            animate={{ width: '40px' }} 
-            className="ritual-line" 
-          />
-          <span className="ritual-moment">
-            {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
-          </span>
+        <div className="sanctuary-header-row">
+          <div>
+            <div className="header-ritual">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: '40px' }}
+                className="ritual-line"
+              />
+              <span className="ritual-moment">
+                {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+              </span>
+            </div>
+            <h1 className="ritual-text-main">Divine State</h1>
+          </div>
+
+          <div
+            className="sanctuary-info-wrap"
+            onMouseEnter={() => setShowSanctuaryHint(true)}
+            onMouseLeave={() => setShowSanctuaryHint(false)}
+          >
+            <button
+              type="button"
+              className="sanctuary-info-btn"
+              onClick={() => {
+                setShowSanctuaryHint((current) => !current);
+                localStorage.setItem('lumina_sanctuary_hint_seen', 'true');
+              }}
+              aria-label="What is Lumina?"
+              aria-expanded={showSanctuaryHint}
+            >
+              <Info size={18} />
+            </button>
+
+            <AnimatePresence>
+              {showSanctuaryHint && (
+                <motion.div
+                  className="sanctuary-hint-card"
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                >
+                  <span>What Lumina is</span>
+                  <p>
+                    Lumina is your calm space for daily alignment. Use it to set
+                    intentions, save affirmations, write reflections, focus with
+                    sound, and anchor visual goals.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-        <h1 className="ritual-text-main">Divine State</h1>
       </header>
 
       <div className="sanctuary-layout">
@@ -126,18 +195,33 @@ export default function Sanctuary({
             </div>
 
             {latestVision && (
-              <motion.button
-                type="button"
+              <motion.div
                 className="sanctuary-latest-vision"
                 onClick={() => setActiveTab('Vision Portal')}
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
+                role="button"
+                tabIndex={0}
                 aria-label="Open latest anchored vision"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveTab('Vision Portal');
+                  }
+                }}
               >
+                <button
+                  type="button"
+                  className="sanctuary-vision-dismiss"
+                  onClick={hideSanctuaryVision}
+                  aria-label="Hide anchored vision from Sanctuary"
+                >
+                  <X size={16} />
+                </button>
                 <img src={latestVision.url} alt={latestVision.intention} />
                 <span>{latestVision.intention}</span>
-              </motion.button>
+              </motion.div>
             )}
           </div>
 
@@ -149,115 +233,122 @@ export default function Sanctuary({
         </section>
 
         {/* Organic Bento Grid */}
-        <div className="organic-grid">
-          {/* Intention Card */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            onClick={() => setActiveTab('Quantum Lab')}
-            className="organic-card intention-portal"
-          >
-            <div className="card-ornament" />
-            <div className="card-content">
-              <span className="card-label">Primary Intention</span>
-              <h3 className="intention-text">
-                {anchoredIntention ? `"${anchoredIntention}"` : "Anchor your purpose..."}
-              </h3>
-            </div>
-            <ArrowUpRight size={18} className="corner-icon" />
-          </motion.div>
+        <section className="sanctuary-tools">
+          <div className="sanctuary-section-heading">
+            <Sparkles size={16} />
+            <span>Daily Tools</span>
+          </div>
 
-          {/* Flow Lab Sync (Timer) */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            onClick={() => setActiveTab('Flow Lab')}
-            className={`organic-card timer-portal ${timerActive ? 'resonating' : ''}`}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="timer-display">
-              <div className="visual-timer-ring">
-                <svg viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2" />
-                  <motion.circle 
-                    cx="50" cy="50" r="45" 
-                    fill="none" stroke="var(--spectral-glow)" strokeWidth="3" 
-                    strokeLinecap="round"
-                    strokeDasharray="283"
-                    initial={{ strokeDashoffset: 283 }}
-                    animate={{ strokeDashoffset: 283 - (283 * (timeRemaining / (25 * 60))) }}
-                  />
-                </svg>
-                <span className="time-digits">{formatTimer(timeRemaining)}</span>
+          <div className="organic-grid">
+            {/* Intention Card */}
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setActiveTab('Quantum Lab')}
+              className="organic-card intention-portal"
+            >
+              <div className="card-ornament" />
+              <div className="card-content">
+                <span className="card-label">Primary Intention</span>
+                <h3 className="intention-text">
+                  {anchoredIntention ? `"${anchoredIntention}"` : "Anchor your purpose..."}
+                </h3>
               </div>
-            </div>
-            
-            <div className="timer-ritual-controls">
-              <Tooltip description={timerActive ? 'Stop your session' : 'Start your session'} position="left">
-                <LuminaButton onClick={(e) => { e.stopPropagation(); toggleTimer(); }} variant="icon" aria-label={timerActive ? 'Stop your session' : 'Start your session'}>
-                  {timerActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
-                </LuminaButton>
-              </Tooltip>
-              <Tooltip description="Start timer over" position="left">
-                <LuminaButton onClick={(e) => { e.stopPropagation(); resetTimer(); }} variant="icon" size="sm" aria-label="Start timer over">
-                  <RotateCcw size={16} />
-                </LuminaButton>
-              </Tooltip>
-            </div>
-          </motion.div>
+              <ArrowUpRight size={18} className="corner-icon" />
+            </motion.div>
 
-          {/* Frequency Chart Portal */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="organic-card oracle-shortcut"
-            style={{ overflow: 'hidden', position: 'relative' }}
-          >
-            <div className="card-content" style={{ zIndex: 2, position: 'relative' }}>
-              <span className="card-label">Emotional Frequency</span>
-              <h3 className="ritual-text-small" style={{ fontSize: '1.2rem', marginTop: '5px' }}>
-                {frequencyData.length > 0 ? `${frequencyData[frequencyData.length-1].score}Hz Alignment` : 'Syncing Baseline...'}
-              </h3>
-            </div>
-            
-            {frequencyData.length > 1 ? (
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', opacity: 0.85 }}>
-                <svg width="100%" height="100%" viewBox="0 0 200 80" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="freqGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--spectral-glow)" stopOpacity="0.8"/>
-                      <stop offset="100%" stopColor="var(--spectral-glow)" stopOpacity="0"/>
-                    </linearGradient>
-                  </defs>
-                  <path 
-                    d={`${generateChartPath()} L 200,60 L 0,60 Z`} 
-                    fill="url(#freqGrad)" 
-                    transform="translate(0, 20)"
-                  />
-                  <path 
-                    d={generateChartPath()} 
-                    fill="none" 
-                    stroke="var(--spectral-glow)" 
-                    strokeWidth="3" 
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    transform="translate(0, 20)"
-                  />
-                  {frequencyData.map((d, i) => (
-                    <circle 
-                      key={i}
-                      cx={(i / (frequencyData.length - 1)) * 200} 
-                      cy={60 - (d.score / 100) * 60 + 20} 
-                      r="4" 
-                      fill="var(--bg-card)"
-                      stroke="var(--spectral-glow)"
-                      strokeWidth="2"
+            {/* Flow Lab Sync (Timer) */}
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setActiveTab('Flow Lab')}
+              className={`organic-card timer-portal ${timerActive ? 'resonating' : ''}`}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="timer-display">
+                <div className="visual-timer-ring">
+                  <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2" />
+                    <motion.circle 
+                      cx="50" cy="50" r="45" 
+                      fill="none" stroke="var(--spectral-glow)" strokeWidth="3" 
+                      strokeLinecap="round"
+                      strokeDasharray="283"
+                      initial={{ strokeDashoffset: 283 }}
+                      animate={{ strokeDashoffset: 283 - (283 * (timeRemaining / (25 * 60))) }}
                     />
-                  ))}
-                </svg>
+                  </svg>
+                  <span className="time-digits">{formatTimer(timeRemaining)}</span>
+                </div>
               </div>
-            ) : (
-              <div className="oracle-icon-vessel"><Activity size={24} /></div>
-            )}
-          </motion.div>
-        </div>
+              
+              <div className="timer-ritual-controls">
+                <Tooltip description={timerActive ? 'Stop your session' : 'Start your session'} position="left">
+                  <LuminaButton onClick={(e) => { e.stopPropagation(); toggleTimer(); }} variant="icon" aria-label={timerActive ? 'Stop your session' : 'Start your session'}>
+                    {timerActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                  </LuminaButton>
+                </Tooltip>
+                <Tooltip description="Start timer over" position="left">
+                  <LuminaButton onClick={(e) => { e.stopPropagation(); resetTimer(); }} variant="icon" size="sm" aria-label="Start timer over">
+                    <RotateCcw size={16} />
+                  </LuminaButton>
+                </Tooltip>
+              </div>
+            </motion.div>
+
+            {/* Frequency Chart Portal */}
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="organic-card oracle-shortcut"
+              style={{ overflow: 'hidden', position: 'relative' }}
+            >
+              <div className="card-content" style={{ zIndex: 2, position: 'relative' }}>
+                <span className="card-label">Emotional Frequency</span>
+                <h3 className="ritual-text-small" style={{ fontSize: '1.2rem', marginTop: '5px' }}>
+                  {frequencyData.length > 0 ? `${frequencyData[frequencyData.length-1].score}Hz Alignment` : 'Syncing Baseline...'}
+                </h3>
+              </div>
+              
+              {frequencyData.length > 1 ? (
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', opacity: 0.85 }}>
+                  <svg width="100%" height="100%" viewBox="0 0 200 80" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="freqGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--spectral-glow)" stopOpacity="0.8"/>
+                        <stop offset="100%" stopColor="var(--spectral-glow)" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path 
+                      d={`${generateChartPath()} L 200,60 L 0,60 Z`} 
+                      fill="url(#freqGrad)" 
+                      transform="translate(0, 20)"
+                    />
+                    <path 
+                      d={generateChartPath()} 
+                      fill="none" 
+                      stroke="var(--spectral-glow)" 
+                      strokeWidth="3" 
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      transform="translate(0, 20)"
+                    />
+                    {frequencyData.map((d, i) => (
+                      <circle 
+                        key={i}
+                        cx={(i / (frequencyData.length - 1)) * 200} 
+                        cy={60 - (d.score / 100) * 60 + 20} 
+                        r="4" 
+                        fill="var(--bg-card)"
+                        stroke="var(--spectral-glow)"
+                        strokeWidth="2"
+                      />
+                    ))}
+                  </svg>
+                </div>
+              ) : (
+                <div className="oracle-icon-vessel"><Activity size={24} /></div>
+              )}
+            </motion.div>
+          </div>
+        </section>
 
         {/* Cinematic Vision Board Gallery */}
         <section className="sanctuary-vision-board" style={{ marginTop: '20px' }}>

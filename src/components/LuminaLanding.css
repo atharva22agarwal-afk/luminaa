@@ -23,6 +23,10 @@
   transform: scale(1.02);
 }
 
+.landing-container.entering .landing-image {
+  animation: landingDoorOpen 1.7s ease-in-out forwards;
+}
+
 .landing-overlay {
   position: absolute;
   inset: 0;
@@ -30,6 +34,29 @@
     linear-gradient(90deg, rgba(5, 12, 10, 0.88) 0%, rgba(5, 12, 10, 0.68) 42%, rgba(5, 12, 10, 0.18) 100%),
     linear-gradient(0deg, rgba(5, 12, 10, 0.72) 0%, rgba(5, 12, 10, 0) 42%);
   pointer-events: none;
+}
+
+.landing-container.entering .landing-overlay,
+.landing-container.entering .landing-content,
+.landing-container.entering .landing-nav {
+  animation: landingFadeToLight 1.7s ease-in-out forwards;
+}
+
+.heaven-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 1) 0%, rgba(255, 250, 224, 0.96) 22%, rgba(240, 181, 106, 0.54) 42%, rgba(255, 255, 255, 0) 72%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.96) 48%, rgba(255, 255, 255, 0.96) 52%, rgba(255, 255, 255, 0) 100%);
+  transform: scaleX(0.08);
+  transform-origin: 50% 50%;
+}
+
+.landing-container.entering .heaven-flash {
+  animation: heavenDoorFlash 1.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .landing-nav {
@@ -147,6 +174,12 @@
   box-shadow: 0 18px 46px rgba(240, 181, 106, 0.3);
 }
 
+.landing-nav-btn:disabled,
+.enter-btn:disabled {
+  cursor: wait;
+  transform: none;
+}
+
 .landing-highlights {
   display: flex;
   flex-wrap: wrap;
@@ -171,6 +204,55 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heavenDoorFlash {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.08);
+    filter: blur(0);
+  }
+  28% {
+    opacity: 0.95;
+    transform: scaleX(0.24);
+  }
+  64% {
+    opacity: 1;
+    transform: scaleX(1.2);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1.9);
+    filter: blur(10px);
+  }
+}
+
+@keyframes landingFadeToLight {
+  0% { opacity: 1; }
+  60% { opacity: 0.42; }
+  100% { opacity: 0; }
+}
+
+@keyframes landingDoorOpen {
+  0% {
+    transform: scale(1.02);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.08);
+    filter: brightness(1.55) saturate(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-container.entering .landing-image,
+  .landing-container.entering .landing-overlay,
+  .landing-container.entering .landing-content,
+  .landing-container.entering .landing-nav,
+  .landing-container.entering .heaven-flash {
+    animation-duration: 0.2s;
+  }
 }
 
 @media (max-width: 720px) {

@@ -1,10 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, Sparkles, Waves, BookOpen } from 'lucide-react';
 import './LuminaLanding.css';
 
 export default function LuminaLanding({ onEnter }) {
+  const [isEntering, setIsEntering] = useState(false);
+  const [voices, setVoices] = useState([]);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return undefined;
+
+    const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+  }, []);
+
+  const playWelcomeIntro = () => {
+    if (!('speechSynthesis' in window)) return;
+
+    const intro = new SpeechSynthesisUtterance('Welcome... to Lumina.');
+    const availableVoices = voices.length ? voices : window.speechSynthesis.getVoices();
+    const femaleVoice = availableVoices.find((voice) =>
+      /female|zira|samantha|aria|jenny|natural/i.test(`${voice.name} ${voice.voiceURI}`)
+    );
+    if (femaleVoice) intro.voice = femaleVoice;
+
+    intro.rate = 0.72;
+    intro.pitch = 1.06;
+    intro.volume = 1;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(intro);
+  };
+
+  const handleEnter = () => {
+    if (isEntering) return;
+    setIsEntering(true);
+    window.setTimeout(playWelcomeIntro, 220);
+    window.setTimeout(onEnter, 1700);
+  };
+
   return (
-    <section className="landing-container" aria-labelledby="landing-title">
+    <section className={`landing-container ${isEntering ? 'entering' : ''}`} aria-labelledby="landing-title">
       <img
         className="landing-image"
         src="/assets/lumina-sanctuary-hero.png"
@@ -18,7 +56,7 @@ export default function LuminaLanding({ onEnter }) {
           <Sparkles size={18} aria-hidden="true" />
           <span>Lumina</span>
         </div>
-        <button className="landing-nav-btn" onClick={onEnter}>
+        <button className="landing-nav-btn" onClick={handleEnter} disabled={isEntering}>
           Open App
         </button>
       </header>
@@ -32,7 +70,7 @@ export default function LuminaLanding({ onEnter }) {
         </p>
 
         <div className="landing-actions">
-          <button className="enter-btn" onClick={onEnter}>
+          <button className="enter-btn" onClick={handleEnter} disabled={isEntering}>
             <span>Enter Lumina</span>
             <ArrowRight size={18} aria-hidden="true" />
           </button>
@@ -44,6 +82,8 @@ export default function LuminaLanding({ onEnter }) {
           <span><BookOpen size={16} aria-hidden="true" /> Sacred records</span>
         </div>
       </div>
+
+      <div className="heaven-flash" aria-hidden="true" />
     </section>
   );
 }

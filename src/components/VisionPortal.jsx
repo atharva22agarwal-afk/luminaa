@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Image as ImageIcon, Download, Zap, Upload, X } from 'lucide-react';
+import { Check, Image as ImageIcon, Download, Eye, Zap, Upload, X } from 'lucide-react';
 import { LuminaButton } from './LuminaButton';
 
 export default function VisionPortal() {
@@ -9,6 +9,9 @@ export default function VisionPortal() {
   const [saveError, setSaveError] = useState(null);
   const [visionBoard, setVisionBoard] = useState(() => {
     return JSON.parse(localStorage.getItem('lumina_vision_board')) || [];
+  });
+  const [sanctuaryVisionId, setSanctuaryVisionId] = useState(() => {
+    return localStorage.getItem('lumina_sanctuary_vision_id') || '';
   });
 
   const handleImageUpload = (e) => {
@@ -41,6 +44,9 @@ export default function VisionPortal() {
     
     try {
         localStorage.setItem('lumina_vision_board', JSON.stringify(newBoard));
+        localStorage.setItem('lumina_sanctuary_vision_id', String(newItem.id));
+        localStorage.removeItem('lumina_sanctuary_vision_hidden');
+        setSanctuaryVisionId(String(newItem.id));
         window.dispatchEvent(new Event('lumina_vision_board_updated'));
     } catch (err) {
         console.error("Failed to save to localStorage. Image might be too large.", err);
@@ -58,6 +64,18 @@ export default function VisionPortal() {
     const newBoard = visionBoard.filter(item => item.id !== id);
     setVisionBoard(newBoard);
     localStorage.setItem('lumina_vision_board', JSON.stringify(newBoard));
+    if (String(id) === sanctuaryVisionId) {
+      localStorage.removeItem('lumina_sanctuary_vision_id');
+      setSanctuaryVisionId('');
+    }
+    window.dispatchEvent(new Event('lumina_vision_board_updated'));
+  };
+
+  const showInSanctuary = (id) => {
+    const selectedId = String(id);
+    localStorage.setItem('lumina_sanctuary_vision_id', selectedId);
+    localStorage.removeItem('lumina_sanctuary_vision_hidden');
+    setSanctuaryVisionId(selectedId);
     window.dispatchEvent(new Event('lumina_vision_board_updated'));
   };
 
@@ -226,6 +244,27 @@ export default function VisionPortal() {
                     className="hover-lift"
                     style={{ position: 'relative', group: 'img-card' }}
                   >
+                    {String(item.id) === sanctuaryVisionId && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        zIndex: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 10px',
+                        borderRadius: '999px',
+                        background: 'rgba(0,0,0,0.58)',
+                        color: 'white',
+                        fontSize: '0.68rem',
+                        fontWeight: 800,
+                        backdropFilter: 'blur(8px)'
+                      }}>
+                        <Check size={13} />
+                        Sanctuary
+                      </div>
+                    )}
                     <img 
                       src={item.url} 
                       alt={item.intention}
@@ -250,6 +289,26 @@ export default function VisionPortal() {
                     }}>
                       {item.intention.length > 40 ? item.intention.substring(0, 40) + '...' : item.intention}
                     </div>
+                    <LuminaButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => showInSanctuary(item.id)}
+                      icon={String(item.id) === sanctuaryVisionId ? Check : Eye}
+                      style={{
+                        position: 'absolute',
+                        left: '10px',
+                        right: '10px',
+                        bottom: '46px',
+                        zIndex: 2,
+                        justifyContent: 'center',
+                        background: String(item.id) === sanctuaryVisionId ? 'rgba(168,195,176,0.92)' : 'rgba(255,255,255,0.9)',
+                        color: String(item.id) === sanctuaryVisionId ? 'white' : 'var(--text-main)',
+                        border: 'none',
+                        backdropFilter: 'blur(8px)'
+                      }}
+                    >
+                      {String(item.id) === sanctuaryVisionId ? 'Shown in Sanctuary' : 'Show in Sanctuary'}
+                    </LuminaButton>
                     <LuminaButton 
                       variant="circle"
                       onClick={() => removeImage(item.id)}
