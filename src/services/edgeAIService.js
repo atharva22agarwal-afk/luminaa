@@ -197,12 +197,8 @@ export function unloadEdgeLLM() {
 /* ----------------------------------------------------------------------- */
 
 async function fallbackToGroq(prompt, systemPrompt, conversationHistory) {
-  const API_KEY = import.meta.env.VITE_GROQ_KEY;
-  if (!API_KEY) {
-    throw new Error('Both Edge AI and Groq API are unavailable. Please configure VITE_GROQ_KEY in .env or enable WebGPU for Edge AI.');
-  }
-
-  const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+  const API_KEY = "server-side";
+  const API_URL = '/api/groq';
 
   const messages = [
     ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),

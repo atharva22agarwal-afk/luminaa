@@ -6,8 +6,10 @@
 
 import wisdomVault from '../data/wisdomVault.json';
 
-const API_KEY = import.meta.env.VITE_GROQ_KEY;
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+// We now use a Vercel serverless function to proxy requests securely.
+// The actual API key is stored in the Vercel environment variables.
+const API_KEY = "server-side"; 
+const API_URL = "/api/groq";
 const DEFAULT_MODEL = "llama-3.1-8b-instant";
 
 /**

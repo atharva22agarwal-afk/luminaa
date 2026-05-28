@@ -85,14 +85,10 @@ Rules:
 
       // getJournalInsight returns a single insight — use askGroq fallback for full script
       // Actually, let's use the raw Groq API directly for a full script
-      const API_KEY = import.meta.env.VITE_GROQ_KEY;
-      if (!API_KEY) {
-        setScript(createOfflineMeditation({ todayMood, intention }));
-        setError('Using an offline meditation because the AI key is not set.');
-        return;
-      }
+      // Actually, let's use the new backend proxy for a full script
+      const API_KEY = "server-side";
 
-      const fullResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const fullResponse = await fetch('/api/groq', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
