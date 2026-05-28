@@ -86,14 +86,10 @@ Rules:
       // getJournalInsight returns a single insight — use askGroq fallback for full script
       // Actually, let's use the raw Groq API directly for a full script
       // Actually, let's use the new backend proxy for a full script
-      const API_KEY = "server-side";
 
       const fullResponse = await fetch('/api/groq', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           messages: [

@@ -1,23 +1,14 @@
 /**
  * AI Service for Lumina
- * Handles communication with Groq API (Llama 3) for spiritual guidance, 
- * manifesting insights, and journaling reflections.
+ * Handles communication with the backend proxy (/api/groq) which securely
+ * forwards requests to Groq API (Llama 3).
  */
 
 import wisdomVault from '../data/wisdomVault.json';
 
-// We now use a Vercel serverless function to proxy requests securely.
-// The actual API key is stored in the Vercel environment variables.
-const API_KEY = "server-side"; 
 const API_URL = "/api/groq";
 const DEFAULT_MODEL = "llama-3.1-8b-instant";
 
-/**
- * Sends a prompt to the Groq API and returns the generated text.
- * @param {string} prompt - The prompt to send to the AI.
- * @param {Array} history - Optional conversation history (formatted as strings).
- * @returns {Promise<string>} - The AI's response text.
- */
 /**
  * The Oracle AI — an empathetic companion that listens deeply.
  * 
@@ -29,10 +20,6 @@ const DEFAULT_MODEL = "llama-3.1-8b-instant";
  * 5. Full conversation history is sent for continuity.
  */
 export const askOracleAI = async (prompt, conversationMessages = [], userContext = {}) => {
-  if (!API_KEY) {
-    throw new Error("Groq API Key is not configured in .env");
-  }
-
   const { userName = 'Friend', intention, affirmation, longTermMemory } = userContext;
 
   try {
@@ -86,10 +73,7 @@ ${ragContext ? `\n--- WISDOM VAULT (RETRIEVED KNOWLEDGE) ---\nThe user's prompt 
 
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages: messages,
@@ -109,14 +93,9 @@ ${ragContext ? `\n--- WISDOM VAULT (RETRIEVED KNOWLEDGE) ---\nThe user's prompt 
 };
 
 export const getConversationSummary = async (conversationText) => {
-  if (!API_KEY) throw new Error("Groq API Key is not configured");
-
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: DEFAULT_MODEL,
       messages: [
@@ -134,8 +113,6 @@ export const getConversationSummary = async (conversationText) => {
 };
 
 export const extractUserMemory = async (conversationText, currentMemory = "") => {
-  if (!API_KEY) throw new Error("Groq API Key is not configured");
-
   const systemContent = `You are a psychological data extractor for the Lumina AI Oracle.
 Your task is to review a recent conversation transcript and update the user's "Long-Term Dossier".
 Focus on persistent traits: reoccurring anxieties, personal triggers, positive coping mechanisms they prefer, major life events mentioned, and their evolving state of mind.
@@ -147,10 +124,7 @@ ${currentMemory || "Empty - this is a new relationship."}`;
 
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: DEFAULT_MODEL,
       messages: [
@@ -168,14 +142,9 @@ ${currentMemory || "Empty - this is a new relationship."}`;
 };
 
 export const generateAffirmations = async (promptText) => {
-  if (!API_KEY) throw new Error("Groq API Key is not configured");
-  
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: DEFAULT_MODEL,
       messages: [
@@ -190,8 +159,6 @@ export const generateAffirmations = async (promptText) => {
 };
 
 export const getJournalInsight = async (entry) => {
-  if (!API_KEY) throw new Error("Groq API Key is not configured");
-
   // Spin off the mood scorer silently in the background
   scoreUserFrequency(entry).catch(err => console.log("Silent frequency score err", err));
 
@@ -204,7 +171,7 @@ export const getJournalInsight = async (entry) => {
 
     const genRes = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages: [
@@ -237,7 +204,7 @@ OUTPUT ONLY the exact text of the winning insight. Do NOT output numbers, bullet
 
     const criticRes = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: DEFAULT_MODEL, 
         messages: [
@@ -266,17 +233,10 @@ OUTPUT ONLY the exact text of the winning insight. Do NOT output numbers, bullet
  * @returns {Promise<string>} - The AI's response text.
  */
 export const askGroq = async (prompt) => {
-  if (!API_KEY) {
-    throw new Error("Groq API Key is not configured in .env");
-  }
-
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages: [
@@ -297,7 +257,6 @@ export const askGroq = async (prompt) => {
 };
 
 export const scoreUserFrequency = async (text) => {
-  if (!API_KEY) return;
   try {
     const prompt = `You are an elite clinical sentiment analyzer for a mental wellness app.
 Read the user's text and evaluate their fundamental emotional frequency (vibration/alignment) on a scale strictly from 1 to 100.
@@ -310,7 +269,7 @@ User text: "${text}"`;
 
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: DEFAULT_MODEL, 
         messages: [{ role: 'user', content: prompt }],

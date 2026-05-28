@@ -197,7 +197,6 @@ export function unloadEdgeLLM() {
 /* ----------------------------------------------------------------------- */
 
 async function fallbackToGroq(prompt, systemPrompt, conversationHistory) {
-  const API_KEY = "server-side";
   const API_URL = '/api/groq';
 
   const messages = [
@@ -208,10 +207,7 @@ async function fallbackToGroq(prompt, systemPrompt, conversationHistory) {
 
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'llama-3.1-8b-instant',
       messages,
