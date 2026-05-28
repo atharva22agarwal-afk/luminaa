@@ -536,6 +536,76 @@ video {
   overflow: visible;
 }
 
+.sanctuary-hero.has-anchored-vision {
+  min-height: 0;
+  padding: 46px 52px;
+}
+
+.sanctuary-hero-body {
+  display: block;
+}
+
+.sanctuary-hero.has-anchored-vision .sanctuary-hero-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  gap: 34px;
+  align-items: center;
+}
+
+.sanctuary-hero.has-anchored-vision .hero-status {
+  margin-bottom: 28px;
+}
+
+.sanctuary-hero.has-anchored-vision .affirmation-vessel {
+  gap: 30px;
+}
+
+.sanctuary-hero.has-anchored-vision .hero-affirmation-text {
+  font-size: clamp(1.65rem, 3vw, 2.65rem);
+}
+
+.sanctuary-latest-vision {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--glass-border-mystic);
+  border-radius: 28px;
+  padding: 0;
+  background: var(--glass-mystic);
+  box-shadow: 0 22px 48px -18px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.sanctuary-latest-vision img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sanctuary-latest-vision:hover img {
+  transform: scale(1.04);
+}
+
+.sanctuary-latest-vision span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 42px 18px 18px;
+  color: white;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+}
+
 .hero-status {
   display: flex;
   justify-content: space-between;
@@ -1324,6 +1394,24 @@ video {
   .sanctuary-hero {
     border-radius: 28px;
     padding: 34px 22px;
+  }
+
+  .sanctuary-hero.has-anchored-vision {
+    padding: 28px 20px;
+  }
+
+  .sanctuary-hero.has-anchored-vision .sanctuary-hero-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .sanctuary-hero.has-anchored-vision .hero-affirmation-text {
+    font-size: 1.55rem;
+  }
+
+  .sanctuary-latest-vision {
+    aspect-ratio: 16 / 10;
+    border-radius: 22px;
   }
 
   .hero-status {

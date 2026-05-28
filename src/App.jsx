@@ -157,9 +157,9 @@ export default function App() {
           <SidebarItem icon={Zap}        label="Quantum Lab"    tooltip="Advanced tools and experiments" active={activeTab === 'Quantum Lab'}    onClick={() => setActiveTab('Quantum Lab')} />
           <SidebarItem icon={Coffee}     label="Flow Lab"       tooltip="Timer, audio, and meditations" active={activeTab === 'Flow Lab'}       onClick={() => setActiveTab('Flow Lab')} />
           <SidebarItem icon={Book}       label="Sacred Records" tooltip="Write and read your journal" active={activeTab === 'Sacred Records'} onClick={() => setActiveTab('Sacred Records')} />
+          <SidebarItem icon={Heart}      label="Affirmations"   tooltip="Read calming affirmations" active={activeTab === 'Affirmations'}   onClick={() => setActiveTab('Affirmations')} />
           <SidebarItem icon={ImageIcon}  label="Vision Portal"  tooltip="Create vision boards and images" active={activeTab === 'Vision Portal'}  onClick={() => setActiveTab('Vision Portal')} />
           <SidebarItem icon={History}    label="Timeline"       tooltip="See all your past activity" active={activeTab === 'Timeline'}       onClick={() => setActiveTab('Timeline')} />
-          <SidebarItem icon={Heart}      label="Affirmations"   tooltip="Read calming affirmations" active={activeTab === 'Affirmations'}   onClick={() => setActiveTab('Affirmations')} />
           <SidebarItem icon={BarChart3}  label="Insights"       tooltip="See your progress patterns" active={activeTab === 'Insights'}       onClick={() => setActiveTab('Insights')} />
           <SidebarItem icon={Settings}   label="Settings"       tooltip="Change your app settings" active={activeTab === 'Settings'}       onClick={() => setActiveTab('Settings')} />
         </nav>

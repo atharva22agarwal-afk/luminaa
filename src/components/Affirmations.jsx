@@ -191,9 +191,37 @@ export default function Affirmations() {
     setReminderActive(false);
   };
 
+  const anchoredIntention = localStorage.getItem('lumina_primary_intention') || '';
+  const reminderDescription = anchoredIntention
+    ? `At this time, Lumina will bring you back to your current intention: "${anchoredIntention}". The reminder uses your saved affirmations first, then your intention if your library is empty.`
+    : 'Choose a time for Lumina to bring you back to your intention for the day. Add an intention in Manifest Lab or save affirmations here to personalize the reminder.';
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '40px', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
-      
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '1000px', margin: '-18px auto 0', paddingBottom: '100px' }}>
+
+      {/* SECTION D: DAILY ENFORCEMENT */}
+      <div style={{ background: 'var(--bg-card)', padding: '28px 30px', borderRadius: '32px', border: '1px solid var(--glass-border)', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px', flex: '1 1 460px', minWidth: 0 }}>
+           <div style={{ width: '50px', height: '50px', borderRadius: '16px', background: 'var(--bg-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sage-deep)', flex: '0 0 50px' }}>
+             <Bell size={24} />
+           </div>
+           <div style={{ minWidth: 0 }}>
+             <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>Daily Alignment Reminder</h3>
+             <p style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Receive a notification with your affirmation of the day.</p>
+             <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '620px' }}>{reminderDescription}</p>
+           </div>
+         </div>
+         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', flex: '0 1 360px', flexWrap: 'wrap' }}>
+            {reminderActive && <span style={{ fontSize: '0.8rem', color: 'var(--sage-deep)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}><Clock size={14} /> Reminder set for {reminderTime}</span>}
+            <input type="time" value={reminderTime} onChange={e => setReminderTime(e.target.value)} aria-label="Daily reminder time" style={{ padding: '10px 15px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-element)', color: 'var(--text-main)', outline: 'none', minWidth: '124px' }} />
+            {reminderActive ? (
+              <button className="hover-lift" onClick={clearReminder} style={{ background: 'var(--bg-element)', color: 'var(--text-main)', border: '1px solid var(--glass-border)', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Clear</button>
+            ) : (
+              <button className="hover-lift" onClick={setReminder} disabled={!reminderTime} style={{ background: 'var(--sage-green)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', opacity: !reminderTime ? 0.5 : 1 }}>Set</button>
+            )}
+         </div>
+      </div>
+
       <div className="divine-header">
         <h1>Affirmation Library</h1>
         <p>Curate the thoughts that shape your reality.</p>
@@ -243,15 +271,15 @@ export default function Affirmations() {
                style={{ width: '100%', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', padding: '15px 20px', borderRadius: '16px', color: 'var(--text-main)', fontSize: '1rem', outline: 'none', marginBottom: '15px' }}
              />
              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
-               {categories.map(c => (
-                 <button 
-                   key={c}
-                   onClick={() => setAiCategory(c)}
-                   style={{ background: aiCategory === c ? 'var(--sage-green)' : 'var(--bg-card)', color: aiCategory === c ? 'white' : 'var(--text-main)', border: '1px solid var(--glass-border)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', cursor: 'pointer', transition: '0.2s' }}
-                 >
-                   {c}
-                 </button>
-               ))}
+                {categories.map(c => (
+                  <button 
+                    key={c}
+                    onClick={() => setAiCategory(c)}
+                    style={{ background: aiCategory === c ? 'var(--sage-green)' : 'var(--bg-card)', color: aiCategory === c ? 'white' : 'var(--text-main)', border: '1px solid var(--glass-border)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', cursor: 'pointer', transition: '0.2s' }}
+                  >
+                    {c}
+                  </button>
+                ))}
              </div>
              <button 
                 onClick={generateWithAI}
@@ -313,28 +341,6 @@ export default function Affirmations() {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* SECTION D: DAILY ENFORCEMENT */}
-      <div style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '32px', border: '1px solid var(--glass-border)', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '20px' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-           <div style={{ width: '50px', height: '50px', borderRadius: '16px', background: 'var(--bg-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sage-deep)' }}>
-             <Bell size={24} />
-           </div>
-           <div>
-             <h3 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>Daily Alignment Reminder</h3>
-             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Receive a notification with your affirmation of the day.</p>
-           </div>
-         </div>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            {reminderActive && <span style={{ fontSize: '0.8rem', color: 'var(--sage-deep)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}><Clock size={14} /> Reminder set for {reminderTime}</span>}
-            <input type="time" value={reminderTime} onChange={e => setReminderTime(e.target.value)} style={{ padding: '10px 15px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-element)', color: 'var(--text-main)', outline: 'none' }} />
-            {reminderActive ? (
-              <button className="hover-lift" onClick={clearReminder} style={{ background: 'var(--bg-element)', color: 'var(--text-main)', border: '1px solid var(--glass-border)', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Clear</button>
-            ) : (
-              <button className="hover-lift" onClick={setReminder} disabled={!reminderTime} style={{ background: 'var(--sage-green)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', opacity: !reminderTime ? 0.5 : 1 }}>Set</button>
-            )}
-         </div>
       </div>
     </motion.div>
   );

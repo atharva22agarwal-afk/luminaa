@@ -41,6 +41,7 @@ export default function VisionPortal() {
     
     try {
         localStorage.setItem('lumina_vision_board', JSON.stringify(newBoard));
+        window.dispatchEvent(new Event('lumina_vision_board_updated'));
     } catch (err) {
         console.error("Failed to save to localStorage. Image might be too large.", err);
         setSaveError("Board is full or image is too large. Cannot save more items.");
@@ -57,6 +58,7 @@ export default function VisionPortal() {
     const newBoard = visionBoard.filter(item => item.id !== id);
     setVisionBoard(newBoard);
     localStorage.setItem('lumina_vision_board', JSON.stringify(newBoard));
+    window.dispatchEvent(new Event('lumina_vision_board_updated'));
   };
 
   return (
