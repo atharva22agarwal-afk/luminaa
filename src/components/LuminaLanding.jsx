@@ -98,7 +98,7 @@ export default function LuminaLanding({ onEnter }) {
       )}
 
       {/* 2. Top Navigation Bar */}
-      <nav className="relative flex items-center justify-between px-6 py-5 md:px-12 z-50">
+      <nav className="relative flex items-center justify-between px-4 py-4 md:px-12 z-50">
         {/* Logo */}
         <div className="flex items-center space-x-2.5 cursor-pointer group">
           <div className="relative flex items-center justify-center w-8 h-8 rounded-full border border-gold/40 group-hover:border-gold transition-colors duration-500">
@@ -130,23 +130,23 @@ export default function LuminaLanding({ onEnter }) {
       </nav>
 
       {/* 3. Hero Section Wrapper */}
-      <div className="relative max-w-7xl mx-auto px-6 md:px-12 pt-[10vh] pb-[4vh] grid grid-cols-1 lg:grid-cols-12 gap-8 z-30 min-h-[75vh]">
+      <div className="relative max-w-7xl mx-auto px-4 md:px-12 pt-[6vh] pb-[3vh] grid grid-cols-1 lg:grid-cols-12 gap-6 z-30 min-h-[65vh]">
         
         {/* Left Side Content */}
         <div className="lg:col-span-5 flex flex-col justify-center space-y-8 text-left">
           <div className="space-y-4">
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.1] tracking-wide text-white text-glow-gold font-normal">
+            <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl leading-[1.05] tracking-wide text-white text-glow-gold font-normal">
               Awaken the <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-gold to-gold-dark font-medium">Divine Within</span>
             </h1>
-            <p className="font-sans text-sm md:text-base text-gray-400 font-light max-w-md leading-relaxed tracking-wide">
+            <p className="font-sans text-base md:text-lg text-gray-400 font-light max-w-md leading-relaxed tracking-wide">
               A sacred space for your mind, your energy, and your highest transformation. Connect with cosmic frequencies today.
             </p>
           </div>
 
           {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-6 pt-2">
-            <button onClick={handleEnter} className="relative group overflow-hidden rounded-full py-3.5 px-8 bg-gradient-to-r from-gold-dark via-gold to-gold-light text-space-dark font-semibold text-xs tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(223,183,108,0.35)] hover:shadow-[0_0_40px_rgba(223,183,108,0.5)] transition-all duration-500">
+          <div className="flex flex-wrap items-center gap-4 pt-1">
+            <button onClick={handleEnter} className="relative group overflow-hidden rounded-full py-3 px-6 bg-gradient-to-r from-gold-dark via-gold to-gold-light text-space-dark font-semibold text-sm tracking-[0.18em] uppercase shadow-[0_0_30px_rgba(223,183,108,0.35)] hover:shadow-[0_0_40px_rgba(223,183,108,0.5)] transition-all duration-500">
               <span className="relative z-10 flex items-center space-x-2">
                 <span>Enter Lumina</span>
                 <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,7 +174,7 @@ export default function LuminaLanding({ onEnter }) {
         <div className="relative lg:col-span-4 flex items-center justify-center min-h-[40vh] lg:min-h-0">
           
           {/* Cosmic Rings Group */}
-          <div className="absolute w-[300px] h-[300px] md:w-[420px] md:h-[420px] flex items-center justify-center">
+          <div className="absolute w-[260px] h-[260px] md:w-[380px] md:h-[380px] flex items-center justify-center">
             
             {/* outer astro ring */}
             <div className={`absolute inset-0 rounded-full border border-gold/15 glow-ring ${activeAnimations.energyRings ? 'animate-spin-slow' : ''}`}>
@@ -216,7 +216,7 @@ export default function LuminaLanding({ onEnter }) {
           {/* Central Meditating Figure Glowing Vector Silhouette */}
           <div className="relative z-20 flex items-center justify-center select-none animate-float-medium">
             <svg 
-              className="w-52 h-52 md:w-68 md:h-68 filter drop-shadow-[0_0_35px_rgba(223,183,108,0.4)]" 
+              className="w-44 h-44 md:w-60 md:h-60 lg:w-72 lg:h-72 filter drop-shadow-[0_0_35px_rgba(223,183,108,0.4)]" 
               viewBox="0 0 100 100"
             >
               <defs>
@@ -369,18 +369,8 @@ export default function LuminaLanding({ onEnter }) {
       {/* 4. Bottom Grid / Panels */}
       <div className="relative max-w-7xl mx-auto px-6 md:px-12 pb-10 z-40 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
         
-        {/* Bottom Left Scroll to Enter */}
-        <div className="md:col-span-6 flex justify-start">
-          <div className="flex flex-col items-center cursor-pointer group">
-            <div className="w-5 h-8 rounded-full border border-gold/40 flex justify-center p-1 transition-all duration-300 group-hover:border-gold">
-              <div className="w-1 h-2 rounded-full bg-gold animate-bounce" />
-            </div>
-            <span className="text-[9px] tracking-[0.25em] text-gold/60 group-hover:text-gold transition-colors duration-300 uppercase mt-2.5 scroll-line relative">Scroll to Enter</span>
-          </div>
-        </div>
-
-        {/* Bottom Right Quote */}
-        <div className="md:col-span-6 text-center md:text-right">
+        {/* Bottom Quote */}
+        <div className="md:col-span-12 text-center">
           <p className="font-serif italic text-xs text-gray-400 max-w-xs md:ml-auto leading-relaxed tracking-wider">
             "You are not here to become someone. You are here to remember who you are."
           </p>
