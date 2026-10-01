@@ -7,7 +7,7 @@
 import wisdomVault from '../data/wisdomVault.json';
 
 const API_URL = "/api/groq";
-const DEFAULT_MODEL = "llama-3.1-8b-instant";
+const DEFAULT_MODEL = "openai/gpt-oss-20b"; // Updated because llama-3.1-8b-instant is not available
 
 /**
  * The Oracle AI — an empathetic companion that listens deeply.

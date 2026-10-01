@@ -176,7 +176,7 @@ CORE PERSONALITY:
   }
 
   return (
-    <div className="oracle-container" style={{ maxWidth: '800px', margin: '0 auto', height: 'calc(100vh - 250px)', display: 'flex', flexDirection: 'column' }}>
+    <div className="oracle-container" style={{ maxWidth: '800px', margin: '0 auto', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="divine-header" style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1>The Oracle</h1>
@@ -214,7 +214,7 @@ CORE PERSONALITY:
         )}
       </div>
 
-      <div className="chat-flow hide-scrollbar" style={{ flex: 1, overflowY: 'auto', marginBottom: '30px', padding: '20px' }}>
+      <div className="chat-flow" style={{ flex: 1, padding: '20px 0 100px 0' }}>
         <AnimatePresence mode="popLayout">
           {messages.map((m, i) => (
             <motion.div
@@ -252,7 +252,7 @@ CORE PERSONALITY:
         <div ref={chatEndRef} />
       </div>
 
-      <div className="oracle-input glass-mystic" style={{ borderRadius: '50px', padding: '5px 5px 5px 30px', display: 'flex', alignItems: 'center' }}>
+      <div className="oracle-input glass-mystic" style={{ position: 'sticky', bottom: '0px', zIndex: 10, borderRadius: '50px', padding: '5px 5px 5px 30px', display: 'flex', alignItems: 'center' }}>
         <input 
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
